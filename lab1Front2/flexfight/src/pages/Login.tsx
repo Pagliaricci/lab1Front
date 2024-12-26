@@ -1,19 +1,14 @@
-function Login(){
+import LoginFormsComponent from '../components/login/LoginFormsComponent';
+
+function Login() {
     return (
-        <div>
-            <h1 className="py-10 text-center">Login</h1>
-            <form>
-                <label>
-                    Username:
-                    <input type="text" name="username" />
-                </label>
-                <label>
-                    Password:
-                    <input type="password" name="password" />
-                </label>
-                <button type="submit">Login</button>
-            </form>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-xs">
+                <h1 className="py-10 text-center text-2xl font-bold">Login</h1>
+                <LoginFormsComponent />
+            </div>
         </div>
     );
 }
+
 export default Login;
