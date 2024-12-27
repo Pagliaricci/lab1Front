@@ -69,17 +69,15 @@ const SignUpFormsComponent: React.FC = () => {
             <DateOfBirthComponent label="Date of Birth:" name="dob" dayRef={dayRef} monthRef={monthRef} yearRef={yearRef} />
             <SwitchComponent
                 label="Role:"
-                option1="User"
-                option2="Trainer"
+                options={['User', 'Trainer']}
                 selectedOption={role}
-                onclick={setRole}
+                onClick={setRole}
             />
             <SwitchComponent
                 label="Gender:"
-                option1="Male"
-                option2="Female"
+                options={['Male', 'Female']}
                 selectedOption={gender}
-                onclick={setGender}
+                onClick={setGender}
             />
             <div className="flex items-center justify-between">
                 <ButtonComponent type="submit" text="Create account" variant="primary" />

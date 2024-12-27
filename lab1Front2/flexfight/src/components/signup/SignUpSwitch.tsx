@@ -1,15 +1,14 @@
-import  { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import SwitchButton from './SwitchButton';
 
 interface SignUpSwitchProps {
-    option1: string;
-    option2: string;
+    options: string[];
     selectedOption: string;
-    onclick: (option: string) => void; // Agregamos esta propiedad
+    onClick: (option: string) => void;
     label?: string;
 }
 
-const SwitchComponent = forwardRef<{}, SignUpSwitchProps>(({ option1, option2, selectedOption, onclick, label }, ref) => {
+const SwitchComponent = forwardRef<{}, SignUpSwitchProps>(({ options, selectedOption, onClick, label }, ref) => {
     const [currentOption, setCurrentOption] = useState(selectedOption);
 
     useImperativeHandle(ref, () => ({
@@ -20,25 +19,22 @@ const SwitchComponent = forwardRef<{}, SignUpSwitchProps>(({ option1, option2, s
 
     const handleOptionClick = (option: string) => {
         setCurrentOption(option);
-        onclick(option); // Notificar al padre sobre el cambio
+        onClick(option);
     };
 
     return (
         <div className="flex items-center py-1">
-            {label && <span className="mr-4 w-20">{label}</span>}
+            {label && <span className="mr-4 w-20 text-sm">{label}</span>}
             <div className="flex space-x-2">
-                <SwitchButton
-                    text={option1}
-                    type="button"
-                    variant={currentOption === option1 ? 'tertiary' : 'primary'}
-                    onClick={() => handleOptionClick(option1)}
-                />
-                <SwitchButton
-                    text={option2}
-                    type="button"
-                    variant={currentOption === option2 ? 'tertiary' : 'primary'}
-                    onClick={() => handleOptionClick(option2)}
-                />
+                {options.map(option => (
+                    <SwitchButton
+                        key={option}
+                        text={option}
+                        type="button"
+                        variant={currentOption === option ? 'tertiary' : 'primary'}
+                        onClick={() => handleOptionClick(option)}
+                    />
+                ))}
             </div>
         </div>
     );

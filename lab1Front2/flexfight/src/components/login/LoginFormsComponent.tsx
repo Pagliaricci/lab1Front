@@ -38,9 +38,8 @@ const LoginFormsComponent: React.FC = () => {
             }
 
             const message = await response.text();
-            alert(message); // "Login successful"
-            // Uncomment the line below to navigate on success
-            // navigate('/dashboard');
+            alert(message);
+            navigate('/home');
         } catch (error) {
             console.error('Error:', error);
             alert('Something went wrong.');
