@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import Modal from './ModalComponent'; // Importing the modal
-import ExerciseSearchComponent from './ExerciseSearchComponent'; // Importing the ExerciseSearchComponent
+import { FaCheck } from 'react-icons/fa';
+import Modal from './ModalComponent';
+import ExerciseSearchComponent from './ExerciseSearchComponent';
+import { AddedExercise } from './ExerciseSearchComponent';
 
 interface WeekCardComponentProps {
     weekNumber: number;
-    startDay: number; // Added to receive the starting day for the week
+    startDay: number;
+    setExercises: React.Dispatch<React.SetStateAction<any[]>>; // Function to update the exercises
 }
 
-const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, startDay }) => {
+const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, startDay, setExercises }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
-    const [isTrainingDayOpen, setIsTrainingDayOpen] = useState(false); // Control modal visibility
+    const [isTrainingDayOpen, setIsTrainingDayOpen] = useState(false);
+    const [completedExercises, setCompletedExercises] = useState<{ [key: number]: AddedExercise[] }>({});
 
-    // Generate an array of days for the week based on the start day
     const daysOfWeek = Array.from({ length: 7 }, (_, i) => startDay + i);
 
     const toggleExpand = () => {
@@ -20,16 +23,33 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
     };
 
     const handleDayClick = (dayIndex: number) => {
-        setSelectedDay(dayIndex === selectedDay ? null : dayIndex); // Toggle selection of day
+        setSelectedDay(dayIndex === selectedDay ? null : dayIndex);
     };
 
     const handleAddTrainingClick = (event: React.MouseEvent) => {
-        event.preventDefault(); // Prevents any default behavior (like form submission)
-        setIsTrainingDayOpen(true); // Open modal when clicking 'Add training'
+        event.preventDefault();
+        setIsTrainingDayOpen(true);
     };
 
-    const closeModal = () => {
-        setIsTrainingDayOpen(false); // Close modal when clicking close
+    const closeModal = (addedExercises: AddedExercise[]) => {
+        if (addedExercises.length > 0 && selectedDay !== null) {
+            // Update completed exercises for the day
+            setCompletedExercises((prev) => ({
+                ...prev,
+                [selectedDay]: addedExercises,
+            }));
+
+            // Update exercises in the parent component (CRFormsComponent)
+            setExercises((prev) => [
+                ...prev,
+                ...addedExercises.map((exercise) => ({
+                    id: exercise.id,
+                    sets: exercise.series,
+                    reps: exercise.reps,
+                })),
+            ]);
+        }
+        setIsTrainingDayOpen(false);
     };
 
     return (
@@ -39,9 +59,7 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
                 onClick={toggleExpand}
             >
                 <span>Week {weekNumber}</span>
-                <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
-                    ▼
-                </span>
+                <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>▼</span>
             </div>
             {isExpanded && (
                 <div className="pl-2 pr-2 pt-4 pb-4 bg-gray-100">
@@ -54,29 +72,41 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
                                     }`}
                                     onClick={() => handleDayClick(index)}
                                 >
-                                    {day}
+                                    {completedExercises[index] ? <FaCheck className="text-green-500" /> : day}
                                 </div>
                             </div>
                         ))}
                     </div>
-                    {/* Conditionally render the Add Training section */}
                     {selectedDay !== null && (
-                        <div className="mt-4 flex justify-center">
-                            <button
-                                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm"
-                                onClick={handleAddTrainingClick}
-                            >
-                                Add training
-                            </button>
+                        <div className="mt-4 flex flex-col items-center">
+                            {completedExercises[selectedDay] ? (
+                                <div className="flex flex-wrap justify-center gap-4">
+                                    {completedExercises[selectedDay].map((exercise, idx) => (
+                                        <div key={idx} className="p-2 bg-gray-200 text-center rounded-lg shadow-sm w-32">
+                                            <div className="font-bold">{exercise.name}</div>
+                                            <div className="text-sm">Series: {exercise.series}</div>
+                                            <div className="text-sm">Reps: {exercise.reps}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <button
+                                    className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm"
+                                    onClick={handleAddTrainingClick}
+                                >
+                                    Add training
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Modal for Add Training */}
-            <Modal isOpen={isTrainingDayOpen} onClose={closeModal}>
-                <ExerciseSearchComponent onClose={closeModal} />
-            </Modal>
+            {isTrainingDayOpen && (
+                <Modal onClose={() => setIsTrainingDayOpen(false)} isOpen={isTrainingDayOpen}>
+                    <ExerciseSearchComponent onClose={closeModal} />
+                </Modal>
+            )}
         </div>
     );
 };
