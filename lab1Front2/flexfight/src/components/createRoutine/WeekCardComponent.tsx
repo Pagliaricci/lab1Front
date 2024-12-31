@@ -46,8 +46,10 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
                     id: exercise.id,
                     sets: exercise.series,
                     reps: exercise.reps,
+                    day: daysOfWeek[selectedDay], // Use the actual day value
                 })),
             ]);
+
         }
         setIsTrainingDayOpen(false);
     };
