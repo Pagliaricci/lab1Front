@@ -9,6 +9,9 @@ import { useNavigate } from 'react-router-dom';
 function Home() {
     const navigate = useNavigate();
     const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
+    const [routineProgress, setRoutineProgress] = useState<number | null>(null);
+    const [duration, setDuration] = useState<number | 1>(1);
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -21,7 +24,6 @@ function Home() {
                     navigate('/login');
                 } else {
                     const userData = await response.json();
-                    console.log("going to fetch user active routine")
                     fetchActiveRoutine(userData.userID);
                 }
             } catch (error) {
@@ -32,16 +34,19 @@ function Home() {
 
         const fetchActiveRoutine = async (userId: string) => {
             try {
-                console.log(`going to look for the active routine of user ${userId}`)
                 const response = await fetch(`http://localhost:8081/api/routines/getActive?userId=${userId}`, {
                     method: 'GET',
                     credentials: 'include',
                 });
-                
-
                 if (response.ok) {
                     const routine = await response.json();
                     setActiveRoutine(routine?.name || null);
+                    console.log(routine);
+                    console.log(routine?.duration);
+                    setDuration(routine?.duration || 1);
+                    if (routine) {
+                        fetchRoutineProgress(userId, routine.id);
+                    }
                 } else {
                     console.error('No active routine found');
                     setActiveRoutine(null);
@@ -49,6 +54,29 @@ function Home() {
             } catch (error) {
                 console.error('Error fetching active routine:', error);
                 setActiveRoutine(null);
+            }
+        };
+
+        const fetchRoutineProgress = async (userId: string, routineId: string) => {
+            try {
+                const response = await fetch('http://localhost:8081/api/progress/get-routine-progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ userId, routineId }),
+                });
+
+                if (response.ok) {
+                    const progress = await response.json();
+                    if (progress) {
+                        setRoutineProgress((progress.day / (duration * 7)) * 100); // Assuming 28 days
+                    }
+                } else {
+                    setRoutineProgress(null); // If no progress is found
+                }
+            } catch (error) {
+                console.error('Error fetching routine progress:', error);
+                setRoutineProgress(null);
             }
         };
 
@@ -61,7 +89,6 @@ function Home() {
     };
 
     const handleSavedRoutines = () => {
-        console.log('Saved Routines clicked');
         navigate('/saved-routines');
     };
 
@@ -72,14 +99,14 @@ function Home() {
     const handleProfileButton = () => {
         navigate('/profile');
     };
-    
-    const handleActiveRoutine = ()=>{
-        navigate('/active-routine')
-    }
+
+    const handleActiveRoutine = () => {
+        navigate('/active-routine');
+    };
 
     return (
         <div className="relative min-h-screen bg-gray-800">
-            {/* Profile icon with a higher z-index */}
+            {/* Profile icon */}
             <FaUserCircle
                 className="absolute top-8 right-8 text-4xl transition-transform duration-300 ease-in-out transform hover:scale-110 text-blue-500 cursor-pointer z-10"
                 onClick={handleProfileButton}
@@ -92,12 +119,22 @@ function Home() {
 
                 {/* Buttons section */}
                 <div className="home flex flex-wrap gap-6 justify-center items-center">
-                    <HomeButton
-                        name={activeRoutine ? activeRoutine : "Active Routine"}
-                        icon={<FaRegCirclePlay />}
-                        onClick={handleActiveRoutine}
-                        disabled={!activeRoutine} // Disable if no active routine
-                    />
+                    <div className="relative">
+                        <HomeButton
+                            name={activeRoutine ? activeRoutine : "Active Routine"}
+                            icon={<FaRegCirclePlay />}
+                            onClick={handleActiveRoutine}
+                            disabled={!activeRoutine} // Disable if no active routine
+                        />
+                        {routineProgress !== null && (
+                            <div className="absolute bottom-2 left-2 right-2 h-2 bg-gray-300 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-green-500 transition-all duration-300"
+                                    style={{ width: `${routineProgress}%` }}
+                                />
+                            </div>
+                        )}
+                    </div>
                     <HomeButton name="Create Routine" icon={<FaDumbbell />} onClick={handleCreateRoutine} />
                     <HomeButton name="Saved Routines" icon={<FaSave />} onClick={handleSavedRoutines} />
                     <HomeButton name="Subscribe to a Course" icon={<HiOutlinePencilAlt />} onClick={handleSubscribeToACourse} />
