@@ -1,16 +1,19 @@
-// src/components/activeRoutine/ExerciseSlider.tsx
 import React, { useState } from 'react';
+import { FullProgressExercise } from '../../pages/ActiveRoutine';
 
 interface Exercise {
     name: string;
     description: string;
     sets: string;
     reps: string;
+    day: number;
 }
+
+
 
 interface ExerciseSliderProps {
     duration: number;
-    exercisesByDay: Record<number, Exercise[]>;
+    exercisesByDay: Record<number, Exercise[] | FullProgressExercise[]>;
     onDayChange: (day: number) => void;
 }
 
@@ -40,7 +43,7 @@ const ExerciseSlider: React.FC<ExerciseSliderProps> = ({ duration, onDayChange }
                 onMouseLeave={() => setTooltip((prev) => ({ ...prev, visible: false }))}
                 style={{ WebkitAppearance: 'none', appearance: 'none' }}
             />
-            <style jsx>{`
+            <style >{`
                 input[type='range']::-webkit-slider-thumb {
                     width: 24px;
                     height: 24px;
