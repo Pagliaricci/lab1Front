@@ -120,7 +120,7 @@ const Statistics: React.FC = () => {
                         </p>
                     ))}
                     {selectedExercise && (
-                        <div className="mt-4 bg-gray-100 rounded-lg p-4">
+                        <div className="mt-4 bg-gray-300 rounded-lg p-4">
                             <h2 className="text-xl font-semibold mb-2">Exercise Details</h2>
                             <p><strong>Name:</strong> {selectedExercise.exerciseName}</p>
                             <p><strong>Reps:</strong> {selectedExercise.reps}</p>
