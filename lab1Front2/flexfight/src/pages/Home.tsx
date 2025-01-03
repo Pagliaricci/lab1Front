@@ -5,6 +5,8 @@ import { HiOutlinePencilAlt } from "react-icons/hi";
 import { FaRegCirclePlay } from "react-icons/fa6";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import { IoStatsChart } from "react-icons/io5";
+
 
 function Home() {
     const navigate = useNavigate();
@@ -103,6 +105,9 @@ function Home() {
     const handleActiveRoutine = () => {
         navigate('/active-routine');
     };
+    const handleStats = () => {
+        navigate('/stats');
+    }
 
     return (
         <div className="relative min-h-screen bg-gray-800">
@@ -137,6 +142,7 @@ function Home() {
                     </div>
                     <HomeButton name="Create Routine" icon={<FaDumbbell />} onClick={handleCreateRoutine} />
                     <HomeButton name="Saved Routines" icon={<FaSave />} onClick={handleSavedRoutines} />
+                    <HomeButton name="My Stats" icon={<IoStatsChart />} onClick={handleStats} />
                     <HomeButton name="Subscribe to a Course" icon={<HiOutlinePencilAlt />} onClick={handleSubscribeToACourse} />
                 </div>
             </div>

@@ -9,6 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';  // Import the default styles
 import SavedRoutines from "./pages/SavedRoutines";
 import ActiveRoutine from "./pages/ActiveRoutine";
+import Statistics from "./pages/Statistics";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/saved-routines" element={<SavedRoutines />} />
         <Route path="/active-routine" element={<ActiveRoutine />} />
+        <Route path="/stats" element={<Statistics />} />
     </Routes>
     </div>
   );

@@ -36,13 +36,23 @@ export interface FullProgressExercise {
 }
 
 interface RoutineProgress {
-     id: string,
-     userId: string,
-     routineId: string,
-     day : number,
-     amountOfExercisesDone: number,
-     initiationDate: Date
+    id: string;
+    userId: string;
+    routineId: string;
+    day: number;
+    amountOfExercisesDone: number;
+    initiationDate: Date;
 }
+
+export function checkIfAllExerciseIsDone(
+    routineProgress: RoutineProgress | null,
+    progressExercises: Record<number, FullProgressExercise[]>,
+): boolean {
+    if (!routineProgress) return false;
+
+    return progressExercises[routineProgress.day]?.every(exercise => exercise.isDone) ?? false;
+}
+
 
 const ActiveRoutine: React.FC = () => {
     const [loading, setLoading] = useState(true);
@@ -52,6 +62,7 @@ const ActiveRoutine: React.FC = () => {
     const [selectedExercises, setSelectedExercises] = useState<FullRoutineExercise[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [routineProgress, setRoutineProgress] = useState<RoutineProgress | null>(null);
+    const [allExercisesDone, setAllExercisesDone] = useState(false);
     const navigate = useNavigate();
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -71,9 +82,10 @@ const ActiveRoutine: React.FC = () => {
                 const userData = await authResponse.json();
                 setUserId(userData.userID);
 
-                const routineResponse = await fetch(`http://localhost:8081/api/routines/getActive?userId=${userData.userID}`,
-                { method: 'GET', credentials: 'include' }
-            );
+                const routineResponse = await fetch(`http://localhost:8081/api/routines/getActive?userId=${userData.userID}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
 
                 if (routineResponse.ok) {
                     const routine = await routineResponse.json();
@@ -112,8 +124,6 @@ const ActiveRoutine: React.FC = () => {
 
     async function fetchProgressExercises(routineId: string, userId: string) {
         try {
-            console.log('Fetching progress exercises with routineId:', routineId);
-            console.log('Fetching progress exercises with userId:', userId);
             const progressExercisesResponse = await fetch(
                 'http://localhost:8081/api/progress/get-exercise-progress',
                 {
@@ -124,9 +134,7 @@ const ActiveRoutine: React.FC = () => {
                 }
             );
             if (progressExercisesResponse.ok) {
-                console.log('Progress exercises fetched successfully');
                 const progressExercisesData: FullProgressExercise[] = await progressExercisesResponse.json();
-                console.log('Progress exercises data:', progressExercisesData);
                 const progressExercisesMap: Record<number, FullProgressExercise[]> = {};
                 progressExercisesData.forEach((exercise) => {
                     if (!progressExercisesMap[exercise.day]) {
@@ -159,7 +167,6 @@ const ActiveRoutine: React.FC = () => {
                 const progressData: RoutineProgress = await progressResponse.json();
                 setRoutineProgress(progressData);
                 fetchProgressExercises(routineId, userId);
-
             } else {
                 setRoutineProgress(null);
             }
@@ -204,6 +211,15 @@ const ActiveRoutine: React.FC = () => {
             setSelectedExercises([]);
         }
     };
+    
+    useEffect(() => {
+        if (routineProgress) {
+            const allDone = checkIfAllExerciseIsDone(routineProgress, progressExercises);
+            setAllExercisesDone(allDone);
+        }
+    }, [progressExercises, routineProgress]);
+
+
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -212,7 +228,7 @@ const ActiveRoutine: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-800 flex justify-center items-center">
                 <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                    <TiArrowBackOutline size={40} onClick={handleArrowBack}/>
+                    <TiArrowBackOutline size={40} onClick={handleArrowBack} />
                 </div>
                 <div className="w-full max-w-xl bg-gray-900 p-8 rounded-lg shadow-lg">
                     <h1 className="text-3xl font-bold text-white text-center mb-6">
@@ -222,10 +238,29 @@ const ActiveRoutine: React.FC = () => {
                         Day {routineProgress.day}
                     </h2>
                     <div className="m-2 space-y-4">
-                    {progressExercises[routineProgress.day]?.map((exercise) => (
-                        <ExerciseCard key={exercise.routineExerciseId} exercise={exercise} />
-                    ))}
-                        </div>
+                        {allExercisesDone ? (
+                            <div className="bg-green-500 text-white p-4 rounded-lg text-center shadow-lg">
+                                <h3 className="text-xl font-bold">Good Job!</h3>
+                                <p>All exercises done for the day.</p>
+                            </div>
+                        ) : (
+                            progressExercises[routineProgress.day]?.map((exercise) => (
+                                <ExerciseCard
+                                    key={exercise.routineExerciseId}
+                                    exercise={exercise}
+                                    onComplete={() => {
+                                        const updatedProgress = { ...progressExercises }; // Copy progress
+                                        updatedProgress[routineProgress.day] = updatedProgress[routineProgress.day].map(e =>
+                                            e.routineExerciseId === exercise.routineExerciseId ? { ...e, isDone: true } : e
+                                        );
+                                        setProgressExercises(updatedProgress);
+                                        const allDone = checkIfAllExerciseIsDone(routineProgress, updatedProgress);
+                                        setAllExercisesDone(allDone);
+                                    }}
+                                />
+                            ))
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -235,14 +270,14 @@ const ActiveRoutine: React.FC = () => {
         <div className="min-h-screen bg-gray-800 p-6 flex justify-center items-center">
             <div className="w-full max-w-xl bg-gray-900 p-8 rounded-lg shadow-lg">
                 <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                    <TiArrowBackOutline size={40} onClick={handleArrowBack} />
+                    <TiArrowBackOutline size={40} onClick={handleArrowBack}/>
                 </div>
                 <h1 className="text-3xl font-bold text-white text-center mb-6">{routine?.name}</h1>
 
                 <form className="bg-gray-800 p-6 rounded-lg space-y-6">
                     <div className="text-center">
                         <label className="block text-gray-300 text-xl font-semibold mb-2">
-                            Routine Name
+                        Routine Name
                         </label>
                         <div className="bg-gray-700 text-white rounded-lg py-2 px-4 w-full text-center">
                             {routine?.name}
