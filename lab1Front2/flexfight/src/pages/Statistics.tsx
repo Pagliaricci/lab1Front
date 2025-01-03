@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import SetRMComponent from '../components/stats/SetRMComponent';
 
 const localizer = momentLocalizer(moment);
 
@@ -104,6 +105,10 @@ const Statistics: React.FC = () => {
         return `${date.getFullYear()}-${date.toLocaleString('default', { month: 'long' })}`;
     };
 
+    const handleSetRM = (exerciseId: string, rm: number) => {
+        console.log(exerciseId, rm);
+    };
+
     return (
         <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
             <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
@@ -111,7 +116,7 @@ const Statistics: React.FC = () => {
             </div>
             <h1 className="text-5xl font-bold text-white mb-8">Your Fitness Statistics</h1>
             <h1 className="text-3xl font-bold text-white mb-8">Exercise History</h1>
-            <div className="flex w-full max-w-6xl bg-white p-4 rounded-lg shadow-lg">
+            <div className="flex w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
                 <div className="w-1/4 bg-gray-200 rounded-lg p-4 mr-4">
                     <h2 className="text-xl font-semibold mb-2">Training Days by Month</h2>
                     {Object.keys(trainingDaysByMonth).map(month => (
@@ -139,6 +144,9 @@ const Statistics: React.FC = () => {
                         onSelectEvent={handleSelectEvent}
                     />
                 </div>
+            </div>
+            <div className="w-full max-w-2xl bg-white p-4 rounded-lg shadow-lg mt-8">
+                <SetRMComponent onSetRM={handleSetRM} />
             </div>
         </div>
     );

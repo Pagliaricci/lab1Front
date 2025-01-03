@@ -14,6 +14,7 @@ function Home() {
     const [routineProgress, setRoutineProgress] = useState<number | null>(null);
     const [duration, setDuration] = useState<number | 1>(1);
 
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -61,11 +62,11 @@ function Home() {
 
         const fetchRoutineProgress = async (userId: string, routineId: string) => {
             try {
-                const response = await fetch('http://localhost:8081/api/progress/get-routine-progress', {
+                const response = await fetch('http://localhost:8081/api/progress/update-progress-day', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ userId, routineId }),
+                    body: JSON.stringify({ userId: userId,routineId: routineId, date: Date.now() }),
                 });
 
                 if (response.ok) {
@@ -81,7 +82,6 @@ function Home() {
                 setRoutineProgress(null);
             }
         };
-
         checkAuth();
     }, [navigate]);
 
