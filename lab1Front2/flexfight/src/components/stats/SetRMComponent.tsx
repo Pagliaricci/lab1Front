@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Bar } from 'react-chartjs-2';
+import 'chart.js/auto';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Exercise {
     id: string;
@@ -6,6 +10,7 @@ interface Exercise {
     category: string;
     description: string;
     currentRM?: number;
+    objective?: number;
 }
 
 interface SetRMProps {
@@ -22,8 +27,11 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [reps, setReps] = useState<number | string>('');
     const [weight, setWeight] = useState<number | string>('');
+    const [objective, setObjective] = useState<number | string>('');
     const [loading, setLoading] = useState(false);
     const [noResults, setNoResults] = useState(false);
+    const [rmHistory, setRmHistory] = useState<{ date: string, rm: number }[] | null>(null);
+    const [objectiveReached, setObjectiveReached] = useState(false);
 
     const fetchExercises = useCallback(async () => {
         setLoading(true);
@@ -43,41 +51,108 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
         }
     }, [searchQuery, selectedCategory]);
 
-const fetchCurrentRM = useCallback(async (exerciseId: string) => {
-    if (!userId || !exerciseId) {
-        console.error("Invalid parameters: userId or exerciseId is missing.");
-        return;
-    }
-    console.log("Fetching current RM with:", { exerciseId, userId });
-
-    try {
-        const response = await fetch('http://localhost:8081/api/rm/get-rm', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exerciseId, userId }),
-        });
-
-        console.log("Response status:", response.status);
-        if (response.ok) {
-            const data = await response.json();
-            console.log("Fetched RM data:", data);
-            setSelectedExercise((prev) => {
-                if (prev && prev.id === exerciseId) {
-                    console.log("Updating selectedExercise with currentRM:", data.currentRM);
-                    return { ...prev, currentRM: data?.rm };
-                }
-                return prev;
-            });
-        } else if (response.status === 404) {
-            console.error("No RM record found for this exercise.");
-        } else {
-            const errorText = await response.text();
-            console.error("Failed to fetch RM:", errorText);
+    const fetchRMHistory = useCallback(async (exerciseId: string) => {
+        if (!userId || !exerciseId) {
+            console.error("Invalid parameters: userId or exerciseId is missing.");
+            return;
         }
-    } catch (error) {
-        console.error("Error fetching current RM:", error);
-    }
-}, [userId]);
+        console.log("Fetching RM history with:", { exerciseId, userId });
+
+        try {
+            const response = await fetch('http://localhost:8081/api/rm/get-rm-history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exerciseId, userId }),
+            });
+
+            console.log("Response status:", response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Fetched RM history:", data);
+                setRmHistory(data);
+            } else if (response.status === 404) {
+                console.error("No RM history found for this exercise.");
+                setRmHistory(null);
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to fetch RM history:", errorText);
+                setRmHistory(null);
+            }
+        } catch (error) {
+            console.error("Error fetching RM history:", error);
+            setRmHistory(null);
+        }
+    }, [userId]);
+
+    const fetchCurrentRM = useCallback(async (exerciseId: string) => {
+        if (!userId || !exerciseId) {
+            console.error("Invalid parameters: userId or exerciseId is missing.");
+            return;
+        }
+        console.log("Fetching current RM with:", { exerciseId, userId });
+
+        try {
+            const response = await fetch('http://localhost:8081/api/rm/get-rm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exerciseId, userId }),
+            });
+
+            console.log("Response status:", response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Fetched RM data:", data);
+                setSelectedExercise((prev) => {
+                    if (prev && prev.id === exerciseId) {
+                        console.log("Updating selectedExercise with currentRM and objective:", data.currentRM, data.objective);
+                        return { ...prev, currentRM: data?.rm, objective: data?.objective };
+                    }
+                    return prev;
+                });
+            } else if (response.status === 404) {
+                console.error("No RM record found for this exercise.");
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to fetch RM:", errorText);
+            }
+        } catch (error) {
+            console.error("Error fetching current RM:", error);
+        }
+    }, [userId]);
+
+    const setRMObjective = useCallback(async (exerciseId: string, objective: number) => {
+        if (!userId || !exerciseId) {
+            console.error("Invalid parameters: userId or exerciseId is missing.");
+            return;
+        }
+        console.log("Setting RM objective with:", { exerciseId, objective, userId });
+
+        try {
+            const response = await fetch('http://localhost:8081/api/rm/set-rm-objective', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, exerciseId, objective }),
+            });
+
+            console.log("Response status:", response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Set RM objective data:", data);
+                setSelectedExercise((prev) => {
+                    if (prev && prev.id === exerciseId) {
+                        return { ...prev, objective: data?.objective };
+                    }
+                    return prev;
+                });
+                setObjectiveReached(false);
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to set RM objective:", errorText);
+            }
+        } catch (error) {
+            console.error("Error setting RM objective:", error);
+        }
+    }, [userId]);
 
     useEffect(() => {
         fetchExercises();
@@ -86,16 +161,36 @@ const fetchCurrentRM = useCallback(async (exerciseId: string) => {
     useEffect(() => {
         if (selectedExercise && selectedExercise.currentRM === undefined) {
             fetchCurrentRM(selectedExercise.id);
-            console.log(selectedExercise.currentRM)
+            fetchRMHistory(selectedExercise.id);
         }
-    }, [selectedExercise, fetchCurrentRM]);
+    }, [selectedExercise, fetchCurrentRM, fetchRMHistory]);
 
     const handleSetRMClick = () => {
         if (selectedExercise && reps && weight) {
-            onSetRM(selectedExercise.id, Number(reps), Number(weight));
+            const newRM = Number(weight);
+            onSetRM(selectedExercise.id, Number(reps), newRM);
+            if (selectedExercise.objective && selectedExercise.objective !== 0.0 && newRM >= selectedExercise.objective) {
+                toast.success(`Congratulations! You have reached your objective of ${selectedExercise.objective} kg.`, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+                setObjectiveReached(true);
+            }
             setSelectedExercise(null);
             setReps('');
             setWeight('');
+        }
+    };
+
+    const handleSetObjectiveClick = () => {
+        if (selectedExercise && objective) {
+            setRMObjective(selectedExercise.id, Number(objective));
+            setObjective('');
         }
     };
 
@@ -161,6 +256,9 @@ const fetchCurrentRM = useCallback(async (exerciseId: string) => {
                     {selectedExercise.currentRM !== undefined && (
                         <p className="text-center text-sm mb-4">Current RM: {selectedExercise.currentRM}</p>
                     )}
+                    {selectedExercise.objective !== undefined && selectedExercise.objective !== 0.0 && (
+                        <p className="text-center text-sm mb-4">Objective: {selectedExercise.objective}</p>
+                    )}
 
                     <div className="mb-2">
                         <label className="block text-sm">Reps</label>
@@ -205,7 +303,81 @@ const fetchCurrentRM = useCallback(async (exerciseId: string) => {
         </div>
     );
 
-    return <div className="flex w-full">{renderSearchSection()}</div>;
+    const renderRMHistory = () => (
+        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-center">RM History</h3>
+            {rmHistory && rmHistory.length > 0 && selectedExercise?.currentRM !== 0.0 ? (
+                <Bar
+                    data={{
+                        labels: rmHistory.map(entry => new Date(entry.date).toLocaleDateString()),
+                        datasets: [{
+                            label: '1RM Progress',
+                            data: rmHistory.map(entry => entry.rm),
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                        }],
+                    }}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    }}
+                />
+            ) : (
+                <p className="text-center text-gray-500">No RM history for this exercise</p>
+            )}
+        </div>
+    );
+
+    const renderSetObjectiveSection = () => (
+        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-center">Set RM Objective</h3>
+            <div className="mb-2">
+                <label className="block text-sm">Objective</label>
+                <input
+                    type="number"
+                    value={objective}
+                    onChange={(e) => setObjective(e.target.value)}
+                    className="w-full p-2 border rounded-lg mb-4"
+                    placeholder="Enter RM Objective"
+                />
+            </div>
+            <div className="flex justify-end space-x-2">
+                <button
+                    type="button"
+                    className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+                        !objective ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    onClick={handleSetObjectiveClick}
+                    disabled={!objective}
+                >
+                    Set Objective
+                </button>
+            </div>
+            {selectedExercise?.objective !== undefined && selectedExercise.objective !== 0.0 && (
+                <div className={`mt-4 p-4 border rounded-lg ${objectiveReached ? 'bg-green-100' : 'bg-gray-100'} shadow-inner`}>
+                    <h4 className="text-lg font-semibold text-center">Current Objective</h4>
+                    <p className="text-center text-sm">Objective: {selectedExercise.objective}</p>
+                </div>
+            )}
+        </div>
+    );
+
+    return (
+        <div className="flex flex-row w-full max-w-4xl mx-auto p-4 space-x-4">
+            {renderSearchSection()}
+            {selectedExercise && (
+                <div className="flex flex-col space-y-4">
+                    {renderSetObjectiveSection()}
+                    {renderRMHistory()}
+                </div>
+            )}
+            <ToastContainer />
+        </div>
+    );
 };
 
 export default SetRMComponent;
