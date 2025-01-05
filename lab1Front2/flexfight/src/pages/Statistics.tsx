@@ -83,13 +83,27 @@ const Statistics: React.FC = () => {
         checkAuth();
     }, [navigate]);
 
-    const events = exercises.map(exercise => ({
-        title: exercise.exerciseName,
-        start: new Date(exercise.date),
-        end: new Date(exercise.date),
-        allDay: true,
-        ...exercise,
-    }));
+    const handleSetRM = async (exerciseId: string, reps: number, weight: number) => {
+        console.log('Setting RM:', exerciseId, reps, weight, userId);
+        try {
+            const response = await fetch('http://localhost:8081/api/rm/set-rm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userId: userId, exerciseId: exerciseId, reps: reps, weight: weight, date: new Date() }),
+            });
+
+            if (response.ok) {
+                const oneRepMax = await response.json();
+                alert(`1RM calculated successfully: ${oneRepMax.toFixed(2)} kg`);
+            } else {
+                const errorData = await response.text();
+                alert(`Error: ${errorData}`);
+            }
+        } catch (error) {
+            console.error('Error setting RM:', error);
+        }
+    };
 
     const handleSelectEvent = (event: any) => {
         if (selectedExercise && selectedExercise.id === event.id) {
@@ -105,9 +119,13 @@ const Statistics: React.FC = () => {
         return `${date.getFullYear()}-${date.toLocaleString('default', { month: 'long' })}`;
     };
 
-    const handleSetRM = (exerciseId: string, rm: number) => {
-        console.log(exerciseId, rm);
-    };
+    const events = exercises.map(exercise => ({
+        title: exercise.exerciseName,
+        start: new Date(exercise.date),
+        end: new Date(exercise.date),
+        allDay: true,
+        ...exercise,
+    }));
 
     return (
         <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
@@ -115,7 +133,6 @@ const Statistics: React.FC = () => {
                 <TiArrowBackOutline size={40} onClick={handleArrowBack} />
             </div>
             <h1 className="text-5xl font-bold text-white mb-8">Your Fitness Statistics</h1>
-            <h1 className="text-3xl font-bold text-white mb-8">Exercise History</h1>
             <div className="flex w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
                 <div className="w-1/4 bg-gray-200 rounded-lg p-4 mr-4">
                     <h2 className="text-xl font-semibold mb-2">Training Days by Month</h2>
@@ -130,7 +147,7 @@ const Statistics: React.FC = () => {
                             <p><strong>Name:</strong> {selectedExercise.exerciseName}</p>
                             <p><strong>Reps:</strong> {selectedExercise.reps}</p>
                             <p><strong>Sets:</strong> {selectedExercise.sets}</p>
-                            <p><strong>Weight(Kg):</strong> {selectedExercise.weight}</p>
+                            <p><strong>Weight (Kg):</strong> {selectedExercise.weight}</p>
                         </div>
                     )}
                 </div>
@@ -146,7 +163,7 @@ const Statistics: React.FC = () => {
                 </div>
             </div>
             <div className="w-full max-w-2xl bg-white p-4 rounded-lg shadow-lg mt-8">
-                <SetRMComponent onSetRM={handleSetRM} />
+                <SetRMComponent onSetRM={handleSetRM} userId={userId} />
             </div>
         </div>
     );
