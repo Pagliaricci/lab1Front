@@ -304,19 +304,21 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
     );
 
     const renderRMHistory = () => (
-        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg w-full">
             <h3 className="text-xl font-bold mb-4 text-center">RM History</h3>
             {rmHistory && rmHistory.length > 0 && selectedExercise?.currentRM !== 0.0 ? (
                 <Bar
                     data={{
-                        labels: rmHistory.map(entry => new Date(entry.date).toLocaleDateString()),
-                        datasets: [{
-                            label: '1RM Progress',
-                            data: rmHistory.map(entry => entry.rm),
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1,
-                        }],
+                        labels: rmHistory.map((entry) => new Date(entry.date).toLocaleDateString()),
+                        datasets: [
+                            {
+                                label: '1RM Progress',
+                                data: rmHistory.map((entry) => entry.rm),
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                            },
+                        ],
                     }}
                     options={{
                         scales: {
@@ -333,7 +335,7 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
     );
 
     const renderSetObjectiveSection = () => (
-        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg w-full">
             <h3 className="text-xl font-bold mb-4 text-center">Set RM Objective</h3>
             <div className="mb-2">
                 <label className="block text-sm">Objective</label>
@@ -367,7 +369,7 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
     );
 
     return (
-        <div className="flex flex-row w-full max-w-4xl mx-auto p-4 space-x-4">
+        <div className={`flex flex-col w-full transition-all duration-300 ${selectedExercise ? 'max-w-full' : 'max-w-2xl'} mx-auto p-4 space-x-4`}>
             {renderSearchSection()}
             {selectedExercise && (
                 <div className="flex flex-col space-y-4">

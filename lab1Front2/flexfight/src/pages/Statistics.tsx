@@ -5,6 +5,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import SetRMComponent from '../components/stats/SetRMComponent';
+import SetWeightComponent from '../components/stats/SetWeightComponent';
 
 const localizer = momentLocalizer(moment);
 
@@ -162,8 +163,13 @@ const Statistics: React.FC = () => {
                     />
                 </div>
             </div>
-            <div className="w-full max-w-2xl bg-white p-4 rounded-lg shadow-lg mt-8">
-                <SetRMComponent onSetRM={handleSetRM} userId={userId} />
+            <div className="flex w-full max-w-4xl mt-8 space-x-4">
+                <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
+                    <SetRMComponent onSetRM={handleSetRM} userId={userId} />
+                </div>
+                <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
+                    <SetWeightComponent userId={userId} />
+                </div>
             </div>
         </div>
     );
