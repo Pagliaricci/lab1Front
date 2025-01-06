@@ -6,6 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import SetRMComponent from '../components/stats/SetRMComponent';
 import SetWeightComponent from '../components/stats/SetWeightComponent';
+import DaysTrainedObjective from '../components/stats/DaysTrainedObjective';
 
 const localizer = momentLocalizer(moment);
 
@@ -13,6 +14,7 @@ const Statistics: React.FC = () => {
     const navigate = useNavigate();
     const [exercises, setExercises] = useState<any[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
+    const [userHeight, setUserHeight] = useState<number | null>(null);
     const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
     const [trainingDaysByMonth, setTrainingDaysByMonth] = useState<{ [key: string]: number }>({});
 
@@ -33,6 +35,7 @@ const Statistics: React.FC = () => {
                     const userData = await response.json();
                     setUserId(userData.userID);
                     fetchExercises(userData.userID);
+                    fetchUserHeight(userData.userID);
                 }
             } catch (error) {
                 console.error('Error checking authentication:', error);
@@ -58,6 +61,24 @@ const Statistics: React.FC = () => {
                 }
             } catch (error) {
                 console.error('Error fetching exercises:', error);
+            }
+        };
+
+        const fetchUserHeight = async (id: string) => {
+            try {
+                const response = await fetch('http://localhost:8081/users/get-height', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: id }),
+                });
+                if (response.ok) {
+                    const height = await response.json();
+                    setUserHeight(height);
+                } else {
+                    console.error('Error fetching user height');
+                }
+            } catch (error) {
+                console.error('Error fetching user height:', error);
             }
         };
 
@@ -128,6 +149,9 @@ const Statistics: React.FC = () => {
         ...exercise,
     }));
 
+    const currentMonthKey = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+    const daysTrainedThisMonth = trainingDaysByMonth[currentMonthKey] || 0;
+
     return (
         <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
             <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
@@ -165,10 +189,13 @@ const Statistics: React.FC = () => {
             </div>
             <div className="flex w-full max-w-4xl mt-8 space-x-4">
                 <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
-                    <SetRMComponent onSetRM={handleSetRM} userId={userId} />
+                    <SetRMComponent onSetRM={handleSetRM} userId={userId}/>
                 </div>
                 <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
-                    <SetWeightComponent userId={userId} />
+                    <SetWeightComponent userId={userId} userHeight={userHeight}/>
+                </div>
+                <div className="w-full max-w-4xl mt-8">
+                    <DaysTrainedObjective userId={userId} trainingDaysByMonth={trainingDaysByMonth} daysTrainedThisMonth={daysTrainedThisMonth}/>
                 </div>
             </div>
         </div>

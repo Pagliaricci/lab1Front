@@ -12,9 +12,10 @@ interface WeightHistory {
 
 interface SetWeightProps {
     userId: string | null;
+    userHeight: number | null;
 }
 
-const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
+const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) => {
     const [weight, setWeight] = useState<number | string>('');
     const [objective, setObjective] = useState<number | string>('');
     const [weightHistory, setWeightHistory] = useState<WeightHistory[] | null>(null);
@@ -23,6 +24,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
     const [currentWeightObjective, setCurrentWeightObjective] = useState<number | null>(null);
     const [isHigherObjective, setIsHigherObjective] = useState(false);
     const [isHigher, setIsHigher] = useState(true);
+    const [imc, setImc] = useState<number | null>(null);
 
     const fetchWeightHistory = useCallback(async () => {
         if (!userId) {
@@ -99,6 +101,19 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
             setCurrentWeightObjective(null);
         }
     }, [userId]);
+
+    const calculateIMC = (weight: number, height: number) => {
+        if (height > 0) {
+            return (weight / ((height / 100) ** 2)).toFixed(2);
+        }
+        return null;
+    };
+
+    useEffect(() => {
+        if (currentWeight !== null && userHeight !== null) {
+            setImc(Number(calculateIMC(currentWeight, userHeight)));
+        }
+    }, [currentWeight, userHeight]);
 
     const handleSetWeightClick = async () => {
         if (!userId || !weight) {
@@ -234,6 +249,35 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
         </div>
     );
 
+    const renderIMCHistory = () => (
+        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-center">IMC History</h3>
+            {weightHistory && weightHistory.length > 0 ? (
+                <Bar
+                    data={{
+                        labels: weightHistory.map(entry => new Date(entry.date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'IMC Progress',
+                            data: weightHistory.map(entry => calculateIMC(entry.weight, userHeight!)),
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1,
+                        }],
+                    }}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    }}
+                />
+            ) : (
+                <p className="text-center text-gray-500">No IMC history available</p>
+            )}
+        </div>
+    );
+
     const renderSetObjectiveSection = () => (
         <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
             <h3 className="text-xl font-bold mb-4 text-center">Set Weight Objective</h3>
@@ -276,6 +320,9 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
                 {currentWeight !== null && (
                     <p className="text-center text-sm mb-4">Current Weight: {currentWeight} kg</p>
                 )}
+                {imc !== null && (
+                    <p className="text-center text-sm mb-4">Current IMC: {imc} kg/m^2</p>
+                )}
                 <div className="mb-2">
                     <label className="block text-sm">Weight</label>
                     <input
@@ -300,6 +347,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
                 </div>
             </div>
             {renderWeightHistory()}
+            {renderIMCHistory()}
             {renderSetObjectiveSection()}
             <ToastContainer />
         </div>

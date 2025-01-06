@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e901749c-fa52-4502-9dcb-bbb371aae91c" name="Changes" comment="corrected stats">
-      <change afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/ToggleSwitch.tsx" afterDir="false" />
+    <list default="true" id="e901749c-fa52-4502-9dcb-bbb371aae91c" name="Changes" comment="weight objective and history finished">
+      <change afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/DaysTrainedObjective.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetWeightComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetWeightComponent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Statistics.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Statistics.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,7 +129,8 @@
       <workItem from="1735916082260" duration="4384000" />
       <workItem from="1736028939310" duration="8528000" />
       <workItem from="1736078639555" duration="9740000" />
-      <workItem from="1736167843467" duration="9962000" />
+      <workItem from="1736167843467" duration="12512000" />
+      <workItem from="1736197518015" duration="8002000" />
     </task>
     <task id="LOCAL-00001" summary="cookies + corrections on CR + first version of SR">
       <option name="closed" value="true" />
@@ -156,7 +156,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735916629651</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="weight objective and history finished">
+      <option name="closed" value="true" />
+      <created>1736179053417</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736179053417</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -166,6 +174,7 @@
     <MESSAGE value="cookies + corrections on CR + first version of SR" />
     <MESSAGE value="finished sr + advance ar + progressBar in home" />
     <MESSAGE value="corrected stats" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected stats" />
+    <MESSAGE value="weight objective and history finished" />
+    <option name="LAST_COMMIT_MESSAGE" value="weight objective and history finished" />
   </component>
 </project>
