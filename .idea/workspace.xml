@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e901749c-fa52-4502-9dcb-bbb371aae91c" name="Changes" comment="corrected stats">
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetRMComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetRMComponent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Statistics.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Statistics.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/ToggleSwitch.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetWeightComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/components/stats/SetWeightComponent.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,6 +81,19 @@
       <recent name="$PROJECT_DIR$/lab1Front2/flexfight/src/components/login/LoginButtonComponent.tsx" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="lab1Front" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="lab1Front" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -112,7 +128,9 @@
       <workItem from="1735837800120" duration="19032000" />
       <workItem from="1735893359736" duration="6920000" />
       <workItem from="1735916082260" duration="4384000" />
-      <workItem from="1736028939310" duration="8310000" />
+      <workItem from="1736028939310" duration="8528000" />
+      <workItem from="1736078639555" duration="9740000" />
+      <workItem from="1736167843467" duration="9962000" />
     </task>
     <task id="LOCAL-00001" summary="cookies + corrections on CR + first version of SR">
       <option name="closed" value="true" />

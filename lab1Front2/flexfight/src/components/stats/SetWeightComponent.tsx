@@ -3,6 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ToggleSwitch from './ToggleSwitch';
 
 interface WeightHistory {
     date: string;
@@ -20,6 +21,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
     const [objectiveReached, setObjectiveReached] = useState(false);
     const [currentWeight, setCurrentWeight] = useState<number | null>(null);
     const [currentWeightObjective, setCurrentWeightObjective] = useState<number | null>(null);
+    const [isHigherObjective, setIsHigherObjective] = useState(false);
     const [isHigher, setIsHigher] = useState(true);
 
     const fetchWeightHistory = useCallback(async () => {
@@ -59,10 +61,9 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId }),
             });
-
             if (response.ok) {
                 const data = await response.json();
-                setCurrentWeight(data.weight);
+                setCurrentWeight(data);
             } else {
                 setCurrentWeight(null);
             }
@@ -87,7 +88,9 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                setCurrentWeightObjective(data);
+                setCurrentWeightObjective(data.objective);
+                setIsHigherObjective(data.isHigher)
+
             } else {
                 setCurrentWeightObjective(null);
             }
@@ -111,20 +114,34 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
             });
 
             if (response.ok) {
-                toast.success(`Weight set successfully: ${weight} kg`, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                });
-                fetchWeightHistory();
-                fetchCurrentWeight();
-                fetchCurrentWeightObjective();
-                if (objective && Number(weight) >= Number(objective)) {
-                    toast.success(`Congratulations! You have reached your weight objective of ${objective} kg.`, {
+                if (currentWeightObjective !== null) {
+                    const objectiveReached = isHigherObjective
+                        ? Number(weight) >= currentWeightObjective
+                        : Number(weight) <= currentWeightObjective;
+                    if (objectiveReached) {
+                        toast.success(`Congratulations! You have reached your weight objective of ${isHigherObjective ? 'higher than' : 'lower than'} ${currentWeightObjective} kg.`, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                        });
+                        setObjectiveReached(true);
+                    } else {
+                        toast.success(`Weight set successfully: ${weight} kg`, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                        });
+                    }
+                } else {
+                    toast.success(`Weight set successfully: ${weight} kg`, {
                         position: "top-right",
                         autoClose: 5000,
                         hideProgressBar: false,
@@ -133,8 +150,10 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
                         draggable: true,
                         progress: undefined,
                     });
-                    setObjectiveReached(true);
                 }
+                fetchWeightHistory();
+                fetchCurrentWeight();
+                fetchCurrentWeightObjective();
                 setWeight('');
             } else {
                 const errorText = await response.text();
@@ -159,7 +178,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
             });
 
             if (response.ok) {
-                toast.success(`Weight objective set successfully: ${objective} kg`, {
+                toast.success(`Weight objective set successfully: ${objective} kg ${isHigher ? 'higher than' : 'lower than'}`, {
                     position: "top-right",
                     autoClose: 5000,
                     hideProgressBar: false,
@@ -228,16 +247,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
                     placeholder="Enter Weight Objective"
                 />
             </div>
-            <div className="mb-2 flex items-center">
-                <label className="block text-sm mr-2">Higher</label>
-                <input
-                    type="checkbox"
-                    checked={isHigher}
-                    onChange={() => setIsHigher(!isHigher)}
-                    className="mr-2"
-                />
-                <label className="block text-sm">Lower</label>
-            </div>
+            <ToggleSwitch isHigher={isHigher} setIsHigher={setIsHigher} />
             <div className="flex justify-end space-x-2">
                 <button
                     type="button"
@@ -253,7 +263,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId }) => {
             {currentWeightObjective !== null && (
                 <div className={`mt-4 p-4 border rounded-lg ${objectiveReached ? 'bg-green-100' : 'bg-gray-100'} shadow-inner`}>
                     <h4 className="text-lg font-semibold text-center">Current Objective</h4>
-                    <p className="text-center text-sm">Objective: {currentWeightObjective} kg</p>
+                    <p className="text-center text-sm">Objective: {isHigherObjective ? 'Higher than' : 'Lower than'} {currentWeightObjective} kg </p>
                 </div>
             )}
         </div>
