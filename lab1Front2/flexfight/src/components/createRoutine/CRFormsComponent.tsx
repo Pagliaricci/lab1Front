@@ -11,6 +11,8 @@ const CRFormsComponent: React.FC = () => {
     const [intensity, setIntensity] = useState('3 times per week');
     const [exercises, setExercises] = useState<any[]>([]); // Track exercises data
     const [userId, setUserId] = useState<string | null>(null); // Track user ID
+    const [userRole, setUserRole] = useState<string | null>(null); // Track user role
+    const [price, setPrice] = useState<number | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,6 +29,7 @@ const CRFormsComponent: React.FC = () => {
 
                 const userData = await response.json();
                 setUserId(userData.userID);
+                setUserRole(userData.role);
             } catch (error) {
                 console.error('Error fetching user ID:', error);
             }
@@ -40,51 +43,52 @@ const CRFormsComponent: React.FC = () => {
     };
 
     const handleCreateRoutine = async (event: React.FormEvent) => {
-    event.preventDefault();
+        event.preventDefault();
 
-    if (!userId) {
-        alert('User ID not found. Please try again.');
-        return;
-    }
-
-    // Generate the exercises array dynamically based on the week/day
-    const exercisesPayload = exercises.map((exercise) => ({
-        exerciseId: exercise.id,  // Exercise ID
-        sets: exercise.sets.toString(),  // Ensure it's a string, if needed
-        reps: exercise.reps.toString(),  // Ensure it's a string, if needed
-        day: exercise.day,  // Use the actual day from the exercise object
-    }));
-
-    // Create the routine payload
-    const payload = {
-        name: nameRef.current?.value,
-        duration,
-        intensity,
-        price: 0, // Set price as 0
-        creator: userId,  // Use fetched user ID
-        exercises: exercisesPayload,  // Include exercises data
-    };
-
-    try {
-        const response = await fetch('http://localhost:8081/api/routines/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            alert(`Error: ${errorData}`);
+        if (!userId) {
+            alert('User ID not found. Please try again.');
             return;
         }
 
-        const message = await response.text();
-        alert(message); // "Routine created successfully"
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Something went wrong.');
-    }
-};
+        // Generate the exercises array dynamically based on the week/day
+        const exercisesPayload = exercises.map((exercise) => ({
+            exerciseId: exercise.id,  // Exercise ID
+            sets: exercise.sets.toString(),  // Ensure it's a string, if needed
+            reps: exercise.reps.toString(),  // Ensure it's a string, if needed
+            day: exercise.day,  // Use the actual day from the exercise object
+        }));
+
+        // Create the routine payload
+        const payload = {
+            name: nameRef.current?.value,
+            duration,
+            intensity,
+            price: userRole === 'Trainer' ? price : 0, // Set price if user is a trainer
+            creator: userId,  // Use fetched user ID
+            exercises: exercisesPayload,  // Include exercises data
+        };
+
+        try {
+            const response = await fetch('http://localhost:8081/api/routines/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                alert(`Error: ${errorData}`);
+                return;
+            }
+
+            const message = await response.text();
+            alert(message); // "Routine created successfully"
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong.');
+        }
+    };
+
     // Handle incrementing and decrementing duration
     const incrementDuration = () => {
         if (duration < 4) setDuration(duration + 1);
@@ -105,7 +109,7 @@ const CRFormsComponent: React.FC = () => {
             <div className="flex justify-center items-center min-h-screen bg-gray-100">
                 <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-lg"
                       onSubmit={handleCreateRoutine}>
-                    <InputTextComponent label="Name of the Routine:" type="text" name="name" ref={nameRef}/>
+                    <InputTextComponent label="Name of the Course:" type="text" name="name" ref={nameRef}/>
                     <div className="flex items-center mb-4">
                         <label className="mr-2">Duration:</label>
                         <button
@@ -135,6 +139,19 @@ const CRFormsComponent: React.FC = () => {
                         onClick={setIntensity}
                     />
 
+                    {userRole === 'Trainer' && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Price:</label>
+                            <input
+                                type="number"
+                                value={price ?? ''}
+                                onChange={(e) => setPrice(Number(e.target.value))}
+                                className="w-full p-2 border rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Enter Course Price"
+                            />
+                        </div>
+                    )}
+
                     {/* Week Cards Container */}
                     <div className="overflow-y-auto transition-all duration-300"
                          style={{maxHeight: `${weekContainerHeight}px`}}>
@@ -151,7 +168,7 @@ const CRFormsComponent: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <button type="submit"
                                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            Create Routine
+                            Create Course
                         </button>
                     </div>
                 </form>

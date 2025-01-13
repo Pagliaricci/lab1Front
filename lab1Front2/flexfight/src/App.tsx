@@ -10,6 +10,8 @@ import 'react-toastify/dist/ReactToastify.css';  // Import the default styles
 import SavedRoutines from "./pages/SavedRoutines";
 import ActiveRoutine from "./pages/ActiveRoutine";
 import Statistics from "./pages/Statistics";
+import SubscribeToACourse from "./pages/SubscribeToACourse";
+import CourseSubscribers from "./pages/CourseSubscribers";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/saved-routines" element={<SavedRoutines />} />
         <Route path="/active-routine" element={<ActiveRoutine />} />
         <Route path="/stats" element={<Statistics />} />
+        <Route path="/subscribe-to-course" element={<SubscribeToACourse />} />
+        <Route path="/course-subs" element={<CourseSubscribers />} />
     </Routes>
     </div>
   );

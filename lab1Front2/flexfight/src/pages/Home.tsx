@@ -7,13 +7,12 @@ import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { IoStatsChart } from "react-icons/io5";
 
-
 function Home() {
     const navigate = useNavigate();
     const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
     const [routineProgress, setRoutineProgress] = useState<number | null>(null);
     const [duration, setDuration] = useState<number | 1>(1);
-
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -27,6 +26,7 @@ function Home() {
                     navigate('/login');
                 } else {
                     const userData = await response.json();
+                    setUserRole(userData.role);
                     fetchActiveRoutine(userData.userID);
                 }
             } catch (error) {
@@ -44,8 +44,6 @@ function Home() {
                 if (response.ok) {
                     const routine = await response.json();
                     setActiveRoutine(routine?.name || null);
-                    console.log(routine);
-                    console.log(routine?.duration);
                     setDuration(routine?.duration || 1);
                     if (routine) {
                         fetchRoutineProgress(userId, routine.id);
@@ -66,7 +64,7 @@ function Home() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ userId: userId,routineId: routineId, date: Date.now() }),
+                    body: JSON.stringify({ userId: userId, routineId: routineId, date: Date.now() }),
                 });
 
                 if (response.ok) {
@@ -95,7 +93,12 @@ function Home() {
     };
 
     const handleSubscribeToACourse = () => {
-        console.log('Subscribe to a course clicked');
+        if (userRole === 'Trainer') {
+            navigate('/course-subs');
+        }
+        else {
+            navigate('/subscribe-to-course');
+        }
     };
 
     const handleProfileButton = () => {
@@ -105,9 +108,10 @@ function Home() {
     const handleActiveRoutine = () => {
         navigate('/active-routine');
     };
+
     const handleStats = () => {
         navigate('/stats');
-    }
+    };
 
     return (
         <div className="relative min-h-screen bg-gray-800">
@@ -124,26 +128,28 @@ function Home() {
 
                 {/* Buttons section */}
                 <div className="home flex flex-wrap gap-6 justify-center items-center">
-                    <div className="relative">
-                        <HomeButton
-                            name={activeRoutine ? activeRoutine : "Active Routine"}
-                            icon={<FaRegCirclePlay />}
-                            onClick={handleActiveRoutine}
-                            disabled={!activeRoutine} // Disable if no active routine
-                        />
-                        {routineProgress !== null && (
-                            <div className="absolute bottom-2 left-2 right-2 h-2 bg-gray-300 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-green-500 transition-all duration-300"
-                                    style={{ width: `${routineProgress}%` }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                    <HomeButton name="Create Routine" icon={<FaDumbbell />} onClick={handleCreateRoutine} />
-                    <HomeButton name="Saved Routines" icon={<FaSave />} onClick={handleSavedRoutines} />
-                    <HomeButton name="My Stats" icon={<IoStatsChart />} onClick={handleStats} />
-                    <HomeButton name="Subscribe to a Course" icon={<HiOutlinePencilAlt />} onClick={handleSubscribeToACourse} />
+                    {userRole !== 'Trainer' && (
+                        <div className="relative">
+                            <HomeButton
+                                name={activeRoutine ? activeRoutine : "Active Routine"}
+                                icon={<FaRegCirclePlay />}
+                                onClick={handleActiveRoutine}
+                                disabled={!activeRoutine} // Disable if no active routine
+                            />
+                            {routineProgress !== null && (
+                                <div className="absolute bottom-2 left-2 right-2 h-2 bg-gray-300 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-green-500 transition-all duration-300"
+                                        style={{ width: `${routineProgress}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    <HomeButton name={userRole === 'Trainer' ? "Create Course" : "Create Routine"} icon={<FaDumbbell />} onClick={handleCreateRoutine} />
+                    <HomeButton name={userRole === 'Trainer' ? "Saved Courses" : "Saved Routines"} icon={<FaSave />} onClick={handleSavedRoutines} />
+                    {userRole !== 'Trainer' && <HomeButton name="My Stats" icon={<IoStatsChart />} onClick={handleStats} />}
+                    <HomeButton name={userRole === 'Trainer' ? "My Course Subscribers" : "Subscribe to a Course"} icon={<HiOutlinePencilAlt />} onClick={handleSubscribeToACourse} />
                 </div>
             </div>
         </div>
