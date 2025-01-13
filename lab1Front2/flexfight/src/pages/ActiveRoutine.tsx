@@ -4,6 +4,7 @@ import { TiArrowBackOutline } from 'react-icons/ti';
 import ExerciseSlider from '../components/activeRoutine/ExerciseSlider';
 import Button from '../components/activeRoutine/Button';
 import ExerciseCard from '../components/activeRoutine/ExerciseCard';
+import RateRoutineCard from '../components/activeRoutine/RateRoutineCard';
 
 interface FullRoutineExercise {
     name: string;
@@ -44,15 +45,19 @@ interface RoutineProgress {
     initiationDate: Date;
 }
 
-export function checkIfAllExerciseIsDone(
-    routineProgress: RoutineProgress | null,
-    progressExercises: Record<number, FullProgressExercise[]>,
+export function checkIfAllRoutineExercisesDone(
+    progressExercises: Record<number, FullProgressExercise[]>
 ): boolean {
-    if (!routineProgress) return false;
-
-    return progressExercises[routineProgress.day]?.every(exercise => exercise.isDone) ?? false;
+    return Object.values(progressExercises).flat().every(exercise => exercise.isDone);
 }
 
+export function checkIfAllDayExercisesDone(
+    routineProgress: RoutineProgress | null,
+    progressExercises: Record<number, FullProgressExercise[]>
+): boolean {
+    if (!routineProgress) return false;
+    return progressExercises[routineProgress.day]?.every(exercise => exercise.isDone) ?? false;
+}
 
 const ActiveRoutine: React.FC = () => {
     const [loading, setLoading] = useState(true);
@@ -62,7 +67,9 @@ const ActiveRoutine: React.FC = () => {
     const [selectedExercises, setSelectedExercises] = useState<FullRoutineExercise[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [routineProgress, setRoutineProgress] = useState<RoutineProgress | null>(null);
-    const [allExercisesDone, setAllExercisesDone] = useState(false);
+    const [allRoutineExercisesDone, setAllRoutineExercisesDone] = useState(false);
+    const [allDayExercisesDone, setAllDayExercisesDone] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -204,6 +211,15 @@ const ActiveRoutine: React.FC = () => {
         }
     };
 
+    const checkEndOfRoutine = async (updatedProgress: Record<number, FullProgressExercise[]>) => {
+        if (updatedProgress) {
+            const allRoutineDone = checkIfAllRoutineExercisesDone(updatedProgress);
+            const allDayDone = checkIfAllDayExercisesDone(routineProgress, updatedProgress);
+            setAllRoutineExercisesDone(allRoutineDone);
+            setAllDayExercisesDone(allDayDone);
+        }
+    }
+
     const handleDayChange = (day: number) => {
         if (exercisesByDay[day]) {
             setSelectedExercises(exercisesByDay[day]);
@@ -211,15 +227,36 @@ const ActiveRoutine: React.FC = () => {
             setSelectedExercises([]);
         }
     };
-    
+
     useEffect(() => {
         if (routineProgress) {
-            const allDone = checkIfAllExerciseIsDone(routineProgress, progressExercises);
-            setAllExercisesDone(allDone);
+            const allRoutineDone = checkIfAllRoutineExercisesDone(progressExercises);
+            const allDayDone = checkIfAllDayExercisesDone(routineProgress, progressExercises);
+            setAllRoutineExercisesDone(allRoutineDone);
+            setAllDayExercisesDone(allDayDone);
         }
     }, [progressExercises, routineProgress]);
 
+    const handleRatingSubmit = async (routineId: string, rating: number) => {
+        try {
+            const response = await fetch('http://localhost:8081/api/routines/rate', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ routineId, rating }),
+            });
 
+            if (response.ok) {
+                alert('Routine rated successfully!');
+                setIsModalOpen(false);
+            } else {
+                setError('Failed to rate routine');
+            }
+        } catch (err) {
+            console.error('Error rating routine:', err);
+            setError('Failed to rate routine');
+        }
+    };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -238,30 +275,50 @@ const ActiveRoutine: React.FC = () => {
                         Day {routineProgress.day}
                     </h2>
                     <div className="m-2 space-y-4">
-                        {allExercisesDone ? (
-                            <div className="bg-green-500 text-white p-4 rounded-lg text-center shadow-lg">
+                        {allDayExercisesDone && !allRoutineExercisesDone && (
+                            <div className="bg-blue-500 text-white p-4 rounded-lg text-center shadow-lg">
                                 <h3 className="text-xl font-bold">Good Job!</h3>
                                 <p>All exercises done for the day.</p>
                             </div>
-                        ) : (
-                            progressExercises[routineProgress.day]?.map((exercise) => (
-                                <ExerciseCard
-                                    key={exercise.routineExerciseId}
-                                    exercise={exercise}
-                                    onComplete={() => {
-                                        const updatedProgress = { ...progressExercises }; // Copy progress
-                                        updatedProgress[routineProgress.day] = updatedProgress[routineProgress.day].map(e =>
-                                            e.routineExerciseId === exercise.routineExerciseId ? { ...e, isDone: true } : e
-                                        );
-                                        setProgressExercises(updatedProgress);
-                                        const allDone = checkIfAllExerciseIsDone(routineProgress, updatedProgress);
-                                        setAllExercisesDone(allDone);
-                                    }}
-                                />
-                            ))
                         )}
+                        {allRoutineExercisesDone && (
+                            <div className="bg-green-500 text-white p-4 rounded-lg text-center shadow-lg">
+                                <h3 className="text-xl font-bold">Congratulations!</h3>
+                                <p>All exercises of the routine are completed.</p>
+                                <button
+                                    className="py-2 px-4 bg-green-700 hover:bg-green-900 text-white font-bold rounded mt-4"
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    Finish Routine
+                                </button>
+                            </div>
+                        )}
+                        {!allDayExercisesDone && progressExercises[routineProgress.day]?.map((exercise) => (
+                            <ExerciseCard
+                                key={exercise.routineExerciseId}
+                                exercise={exercise}
+                                onComplete={() => {
+                                    const updatedProgress = { ...progressExercises }; // Copy progress
+                                    updatedProgress[routineProgress.day] = updatedProgress[routineProgress.day].map(e =>
+                                        e.routineExerciseId === exercise.routineExerciseId ? { ...e, isDone: true } : e
+                                    );
+                                    setProgressExercises(updatedProgress);
+                                    checkEndOfRoutine(updatedProgress);
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
+                {isModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <RateRoutineCard
+                                routineId={routine?.id || ''}
+                                onSubmitRating={handleRatingSubmit}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -277,7 +334,7 @@ const ActiveRoutine: React.FC = () => {
                 <form className="bg-gray-800 p-6 rounded-lg space-y-6">
                     <div className="text-center">
                         <label className="block text-gray-300 text-xl font-semibold mb-2">
-                        Routine Name
+                            Routine Name
                         </label>
                         <div className="bg-gray-700 text-white rounded-lg py-2 px-4 w-full text-center">
                             {routine?.name}
@@ -317,7 +374,7 @@ const ActiveRoutine: React.FC = () => {
                                         <h3 className="font-bold">{exercise.name}</h3>
                                         <p>{exercise.description}</p>
                                         <p>
-                                            {exercise.sets} sets of {exercise.reps} reps
+                                            Sets: {exercise.sets}, Reps: {exercise.reps}
                                         </p>
                                     </li>
                                 ))}
