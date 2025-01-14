@@ -60,6 +60,35 @@ const SubscribeToACourse: React.FC = () => {
         fetchCourses();
     }, []);
 
+    useEffect(() => {
+        const fetchSubscribedStatus = async () => {
+            if (userId) {
+                const updatedCourses = await Promise.all(courses.map(async (course) => {
+                    try {
+                        const response = await fetch(`http://localhost:8081/course/isSubscribed?userId=${userId}&routineId=${course.id}`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                        });
+
+                        if (response.ok) {
+                            const isSubscribed = await response.json();
+                            return { ...course, subscribed: isSubscribed };
+                        } else {
+                            console.error(`Failed to fetch subscription status for course ${course.id}`);
+                            return course;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching subscription status for course ${course.id}:`, error);
+                        return course;
+                    }
+                }));
+                setCourses(updatedCourses);
+            }
+        };
+
+        fetchSubscribedStatus();
+    }, [userId, courses]);
+
     const handleSearch = async () => {
         try {
             const response = await fetch(`http://localhost:8081/course/search?query=${searchQuery}`, {
@@ -154,22 +183,26 @@ const SubscribeToACourse: React.FC = () => {
                         Search
                     </button>
                 </div>
-                {courses.map(course => (
-                    <div key={course.id} className="p-4 mb-4 border rounded-lg bg-gray-100 shadow-inner">
-                        <h2 className="text-2xl font-bold mb-2">{course.name}</h2>
-                        <p className="text-gray-700 mb-2">{course.description}</p>
-                        <p className="text-gray-700 mb-2"><strong>Creator:</strong> {course.creator}</p>
-                        <p className="text-gray-700 mb-2"><strong>Duration:</strong> {course.duration} weeks</p>
-                        <p className="text-gray-700 mb-2"><strong>Intensity:</strong> {course.intensity}</p>
-                        <p className="text-gray-700 mb-4"><strong>Price:</strong> ${course.price}</p>
-                        <button
-                            className={`py-2 px-4 rounded ${course.subscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white font-bold`}
-                            onClick={() => course.subscribed ? handleUnsubscribe(course.id) : handleSubscribe(course.id)}
-                        >
-                            {course.subscribed ? 'Unsubscribe' : 'Subscribe'}
-                        </button>
-                    </div>
-                ))}
+                {courses.length === 0 ? (
+                    <p className="text-gray-400">No courses available.</p>
+                ) : (
+                    courses.map(course => (
+                        <div key={course.id} className="p-4 mb-4 border rounded-lg bg-gray-100 shadow-inner">
+                            <h2 className="text-2xl font-bold mb-2">{course.name}</h2>
+                            <p className="text-gray-700 mb-2">{course.description}</p>
+                            <p className="text-gray-700 mb-2"><strong>Creator:</strong> {course.creator}</p>
+                            <p className="text-gray-700 mb-2"><strong>Duration:</strong> {course.duration} weeks</p>
+                            <p className="text-gray-700 mb-2"><strong>Intensity:</strong> {course.intensity}</p>
+                            <p className="text-gray-700 mb-4"><strong>Price:</strong> ${course.price}</p>
+                            <button
+                                className={`py-2 px-4 rounded ${course.subscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white font-bold`}
+                                onClick={() => course.subscribed ? handleUnsubscribe(course.id) : handleSubscribe(course.id)}
+                            >
+                                {course.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
