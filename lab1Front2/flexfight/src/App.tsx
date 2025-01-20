@@ -12,12 +12,14 @@ import ActiveRoutine from "./pages/ActiveRoutine";
 import Statistics from "./pages/Statistics";
 import SubscribeToACourse from "./pages/SubscribeToACourse";
 import CourseSubscribers from "./pages/CourseSubscribers";
+import Chats from "./pages/Chats";
+import ChatPage from './pages/ChatPage';
 
 function App() {
   return (
     <div>
       <ToastContainer />
-    <Routes>
+      <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -29,7 +31,9 @@ function App() {
         <Route path="/stats" element={<Statistics />} />
         <Route path="/subscribe-to-course" element={<SubscribeToACourse />} />
         <Route path="/course-subs" element={<CourseSubscribers />} />
-    </Routes>
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/chat/:chatId" element={<ChatPage />} />
+      </Routes>
     </div>
   );
 }

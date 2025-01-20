@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e901749c-fa52-4502-9dcb-bbb371aae91c" name="Changes" comment="days trained objective finished">
+      <change afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/ChatPage.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Chats.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/CourseSubscribers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/CourseSubscribers.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/SubscribeToACourse.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/SubscribeToACourse.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lab1Front2/flexfight/src/pages/Home.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +125,7 @@
       <workItem from="1736863892128" duration="2034000" />
       <workItem from="1736902097142" duration="2695000" />
       <workItem from="1737341701177" duration="2919000" />
-      <workItem from="1737381053231" duration="3606000" />
+      <workItem from="1737381053231" duration="11100000" />
     </task>
     <task id="LOCAL-00001" summary="cookies + corrections on CR + first version of SR">
       <option name="closed" value="true" />

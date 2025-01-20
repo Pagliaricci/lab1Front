@@ -7,6 +7,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { IoStatsChart } from "react-icons/io5";
 import { useLocation } from 'react-router-dom';
+import { PiChatsDuotone } from "react-icons/pi";
 
 interface LocationState {
     successMessage?: string;
@@ -126,7 +127,9 @@ function Home() {
     const handleStats = () => {
         navigate('/stats');
     };
-
+    const handleChats = () => {
+        navigate('/chats');
+    }
     return (
         <div className="relative min-h-screen bg-gray-800">
             {showMessage && (
@@ -168,6 +171,7 @@ function Home() {
                     <HomeButton name={userRole === 'Trainer' ? "Create Course" : "Create Routine"} icon={<FaDumbbell />} onClick={handleCreateRoutine} />
                     <HomeButton name={userRole === 'Trainer' ? "Saved Courses" : "Saved Routines"} icon={<FaSave />} onClick={handleSavedRoutines} />
                     {userRole !== 'Trainer' && <HomeButton name="My Stats" icon={<IoStatsChart />} onClick={handleStats} />}
+                    <HomeButton name="Chats" icon={<PiChatsDuotone />} onClick={handleChats} />
                     <HomeButton name={userRole === 'Trainer' ? "My Course Subscribers" : "Subscribe to a Course"} icon={<HiOutlinePencilAlt />} onClick={handleSubscribeToACourse} />
                 </div>
             </div>
