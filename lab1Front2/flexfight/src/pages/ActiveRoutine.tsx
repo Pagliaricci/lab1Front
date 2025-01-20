@@ -243,12 +243,12 @@ const ActiveRoutine: React.FC = () => {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ routineId, rating }),
+                body: JSON.stringify({ userId, routineId, rating }),
             });
 
             if (response.ok) {
-                alert('Routine rated successfully!');
                 setIsModalOpen(false);
+                navigate('/home', { state: { successMessage: 'Routine rated successfully!' } });
             } else {
                 setError('Failed to rate routine');
             }
@@ -257,6 +257,7 @@ const ActiveRoutine: React.FC = () => {
             setError('Failed to rate routine');
         }
     };
+
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;

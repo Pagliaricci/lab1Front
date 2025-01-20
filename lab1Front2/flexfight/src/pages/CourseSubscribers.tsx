@@ -99,7 +99,9 @@ const CourseSubscribers: React.FC = () => {
             });
 
             if (response.ok) {
-                const data = await response.json();
+                const responseText = await response.text();
+                console.log('Response Text:', responseText); // Log the response text
+                const data = JSON.parse(responseText); // Parse the response text as JSON
                 setSubscribers(prev => ({ ...prev, [courseId]: data }));
             } else {
                 console.error('Failed to fetch subscribers');

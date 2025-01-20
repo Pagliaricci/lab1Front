@@ -6,6 +6,11 @@ import { FaRegCirclePlay } from "react-icons/fa6";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { IoStatsChart } from "react-icons/io5";
+import { useLocation } from 'react-router-dom';
+
+interface LocationState {
+    successMessage?: string;
+}
 
 function Home() {
     const navigate = useNavigate();
@@ -13,6 +18,15 @@ function Home() {
     const [routineProgress, setRoutineProgress] = useState<number | null>(null);
     const [duration, setDuration] = useState<number | 1>(1);
     const [userRole, setUserRole] = useState<string | null>(null);
+    const location = useLocation() as unknown as { state: LocationState };
+    const successMessage = location.state?.successMessage || null;
+    const [showMessage, setShowMessage] = useState(!!successMessage);
+
+    useEffect(() => {
+        if (showMessage) {
+            setTimeout(() => setShowMessage(false), 3000); // Ocultar después de 3s
+        }
+    }, [showMessage]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -115,6 +129,11 @@ function Home() {
 
     return (
         <div className="relative min-h-screen bg-gray-800">
+            {showMessage && (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+                    {successMessage}
+                </div>
+            )}
             {/* Profile icon */}
             <FaUserCircle
                 className="absolute top-8 right-8 text-4xl transition-transform duration-300 ease-in-out transform hover:scale-110 text-blue-500 cursor-pointer z-10"
