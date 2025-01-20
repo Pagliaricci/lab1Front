@@ -11,6 +11,7 @@ interface Course {
     intensity: string;
     price: number;
     subscribed: boolean;
+    rating: number;
 }
 
 const SubscribeToACourse: React.FC = () => {
@@ -48,6 +49,7 @@ const SubscribeToACourse: React.FC = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setCourses(data);
+                    if (userId) fetchSubscribedStatus(data);
                 } else {
                     console.error('Failed to fetch courses');
                 }
@@ -58,47 +60,52 @@ const SubscribeToACourse: React.FC = () => {
 
         fetchUserId();
         fetchCourses();
-    }, []);
+    }, [userId]);
 
-    useEffect(() => {
-        const fetchSubscribedStatus = async () => {
-            if (userId) {
-                const updatedCourses = await Promise.all(courses.map(async (course) => {
+    const fetchSubscribedStatus = async (coursesToCheck: Course[]) => {
+        if (userId && coursesToCheck.length > 0) {
+            const updatedCourses = await Promise.all(
+                coursesToCheck.map(async (course) => {
                     try {
-                        const response = await fetch(`http://localhost:8081/course/isSubscribed?userId=${userId}&routineId=${course.id}`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' },
-                        });
+                        const response = await fetch(
+                            `http://localhost:8081/course/isSubscribed?userId=${userId}&routineId=${course.id}`,
+                            {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                            }
+                        );
 
                         if (response.ok) {
                             const isSubscribed = await response.json();
                             return { ...course, subscribed: isSubscribed };
-                        } else {
-                            console.error(`Failed to fetch subscription status for course ${course.id}`);
-                            return course;
                         }
                     } catch (error) {
-                        console.error(`Error fetching subscription status for course ${course.id}:`, error);
-                        return course;
+                        console.error(
+                            `Error fetching subscription status for course ${course.id}:`,
+                            error
+                        );
                     }
-                }));
-                setCourses(updatedCourses);
-            }
-        };
-
-        fetchSubscribedStatus();
-    }, [userId, courses]);
+                    return course;
+                })
+            );
+            setCourses(updatedCourses);
+        }
+    };
 
     const handleSearch = async () => {
         try {
-            const response = await fetch(`http://localhost:8081/course/search?query=${searchQuery}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
+            const response = await fetch(
+                `http://localhost:8081/course/search?query=${searchQuery}`,
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
 
             if (response.ok) {
                 const data = await response.json();
                 setCourses(data);
+                if (userId) fetchSubscribedStatus(data);
             } else {
                 console.error('Failed to search courses');
             }
@@ -121,9 +128,10 @@ const SubscribeToACourse: React.FC = () => {
             });
 
             if (response.ok) {
-                setCourses(courses.map(course =>
+                const updatedCourses = courses.map(course =>
                     course.id === courseId ? { ...course, subscribed: true } : course
-                ));
+                );
+                setCourses(updatedCourses);
             } else {
                 console.error('Failed to subscribe to course');
             }
@@ -146,9 +154,10 @@ const SubscribeToACourse: React.FC = () => {
             });
 
             if (response.ok) {
-                setCourses(courses.map(course =>
+                const updatedCourses = courses.map(course =>
                     course.id === courseId ? { ...course, subscribed: false } : course
-                ));
+                );
+                setCourses(updatedCourses);
             } else {
                 console.error('Failed to unsubscribe from course');
             }
@@ -159,6 +168,10 @@ const SubscribeToACourse: React.FC = () => {
 
     const handleArrowBack = () => {
         navigate('/home');
+    };
+
+    const sortCoursesByRating = () => {
+        setCourses(prevCourses => [...prevCourses].sort((a, b) => b.rating - a.rating));
     };
 
     return (
@@ -182,6 +195,12 @@ const SubscribeToACourse: React.FC = () => {
                     >
                         Search
                     </button>
+                    <button
+                        onClick={sortCoursesByRating}
+                        className="mt-2 ml-2 py-2 px-4 bg-green-500 hover:bg-green-700 text-white font-bold rounded"
+                    >
+                        Sort by Rating
+                    </button>
                 </div>
                 {courses.length === 0 ? (
                     <p className="text-gray-400">No courses available.</p>
@@ -193,6 +212,7 @@ const SubscribeToACourse: React.FC = () => {
                             <p className="text-gray-700 mb-2"><strong>Creator:</strong> {course.creator}</p>
                             <p className="text-gray-700 mb-2"><strong>Duration:</strong> {course.duration} weeks</p>
                             <p className="text-gray-700 mb-2"><strong>Intensity:</strong> {course.intensity}</p>
+                            <p className="text-gray-700 mb-2"><strong>Rating:</strong> {course.rating} / 5</p>
                             <p className="text-gray-700 mb-4"><strong>Price:</strong> ${course.price}</p>
                             <button
                                 className={`py-2 px-4 rounded ${course.subscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white font-bold`}
