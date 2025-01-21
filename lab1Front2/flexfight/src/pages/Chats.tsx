@@ -1,33 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TiArrowBackOutline } from 'react-icons/ti';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { TiArrowBackOutline } from "react-icons/ti";
 
-interface Chat {
-    id: string;
-    receiver: {
-        id: string;
-        username: string;
-        email: string;
-        role: string;
-    };
-    lastMessage: string;
-    lastMessageTime: string;
-}
 
 interface User {
     id: string;
     username: string;
-    email: string;
-    role: string;
 }
 
-const Chats: React.FC = () => {
-    const [chats, setChats] = useState<Chat[]>([]);
-    const [trainers, setTrainers] = useState<User[]>([]);
-    const [selectedTrainer, setSelectedTrainer] = useState<string>('');
-    const navigate = useNavigate();
-    const [userId, setUserId] = useState<string | null>(null);
+interface Chat {
+    id: string;
+    user2: User;
+}
 
+const Chats = () => {
+    const [chats, setChats] = useState<Chat[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [selectedUser, setSelectedUser] = useState<string>("");
+    const [userId, setUserId] = useState<string>("");
+    const navigate = useNavigate();
+    
     const handleArrowBack = () => {
         navigate('/home');
     };
@@ -55,139 +47,46 @@ const Chats: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const fetchChats = async () => {
-            try {
-                const response = await fetch(`http://localhost:8081/chats?userId=${userId}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setChats(data);
-                } else {
-                    console.error('Failed to fetch chats');
-                }
-            } catch (error) {
-                console.error('Error fetching chats:', error);
-            }
-        };
-
-        const fetchTrainers = async () => {
-            try {
-                const response = await fetch(`http://localhost:8081/chats/trainers?userId=${userId}`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setTrainers(data);
-                } else {
-                    console.error('Failed to fetch trainers');
-                }
-            } catch (error) {
-                console.error('Error fetching trainers:', error);
-            }
-        };
-
         if (userId) {
-            fetchChats();
-            fetchTrainers();
+            fetch(`http://localhost:8081/chats?userId=${userId}`)
+                .then((res) => res.json())
+                .then(setChats);
+
+            fetch("http://localhost:8081/users")
+                .then((res) => res.json())
+                .then(setUsers);
         }
     }, [userId]);
 
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8081/ws');
-
-        ws.onmessage = (event) => {
-            const newMessage = JSON.parse(event.data);
-            setChats((prevChats) => {
-                const updatedChats = prevChats.map(chat =>
-                    chat.id === newMessage.chatId
-                        ? { ...chat, lastMessage: newMessage.text, lastMessageTime: newMessage.time }
-                        : chat
-                );
-                return updatedChats;
-            });
-            alert(`New message from ${newMessage.trainerName}: ${newMessage.text}`);
-        };
-
-        return () => {
-            ws.close();
-        };
-    }, []);
-
-    const handleStartChat = async () => {
-        if (!selectedTrainer) {
-            alert('Please select a trainer to start a chat.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:8081/chats/start?userId=${userId}&trainerId=${selectedTrainer}`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const newChat = await response.json();
-                setChats([...chats, newChat]);
-                setSelectedTrainer('');
-                navigate(`/chat/${newChat.id}`);
-            } else {
-                console.error('Failed to start chat');
-            }
-        } catch (error) {
-            console.error('Error starting chat:', error);
-        }
-    };
-
-    const handleChatClick = (chatId: string) => {
-        navigate(`/chat/${chatId}`);
+    const startChat = () => {
+        fetch(`http://localhost:8081/chats?user1Id=${userId}&user2Id=${selectedUser}`, {
+            method: "POST",
+        })
+            .then((res) => res.json())
+            .then((newChat) => navigate(`/chat/${newChat.id}`));
     };
 
     return (
-        <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center p-4">
+        <div className="p-4 max-w-lg mx-auto">
             <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
                 <TiArrowBackOutline size={40} onClick={handleArrowBack}/>
             </div>
-            <h1 className="text-5xl font-bold text-white mb-8">Chats</h1>
-            <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
-                <div className="mb-4 flex flex-col sm:flex-row items-center">
-                    <select
-                        value={selectedTrainer}
-                        onChange={(e) => setSelectedTrainer(e.target.value)}
-                        className="w-full sm:w-2/3 p-2 border rounded-lg mb-2 sm:mb-0 sm:mr-2"
-                    >
-                        <option value="">Select a trainer to start a chat</option>
-                        {trainers.map(trainer => (
-                            <option key={trainer.id} value={trainer.id}>{trainer.username}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={handleStartChat}
-                        className="w-full sm:w-1/3 py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
-                    >
-                        Start Chat
-                    </button>
-                </div>
-                {chats.length === 0 ? (
-                    <p className="text-gray-400 text-center">No chats available.</p>
-                ) : (
-                    <div className="space-y-4">
-                        {chats.map(chat => (
-                            <div
-                                key={chat.id}
-                                className="p-4 border rounded-lg bg-gray-100 shadow-inner cursor-pointer hover:bg-gray-200 transition"
-                                onClick={() => handleChatClick(chat.id)}
-                            >
-                                <h2 className="text-2xl font-bold mb-1">{chat.receiver.username}</h2>
-                                <p className="text-gray-700 mb-1">{chat.lastMessage}</p>
-                                <p className="text-gray-500 text-sm">{chat.lastMessageTime}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+            <h1 className="text-2xl font-bold mb-4">Chats</h1>
+            <ul>
+                {chats.map((chat) => (
+                    <li key={chat.id} className="p-2 border-b" onClick={() => navigate(`/chat/${chat.id}`)}>
+                        Chat with User {chat.user2.username}
+                    </li>
+                ))}
+            </ul>
+            <div className="mt-4">
+                <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)} className="border p-2">
+                    <option value="">Select a user</option>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.id}>{user.username}</option>
+                    ))}
+                </select>
+                <button onClick={startChat} className="ml-2 bg-blue-500 text-white px-4 py-2">Start Chat</button>
             </div>
         </div>
     );
