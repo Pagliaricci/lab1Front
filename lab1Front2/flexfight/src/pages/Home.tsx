@@ -127,9 +127,11 @@ function Home() {
     const handleStats = () => {
         navigate('/stats');
     };
+
     const handleChats = () => {
         navigate('/chats');
-    }
+    };
+
     return (
         <div className="relative min-h-screen bg-gray-800">
             {showMessage && (
