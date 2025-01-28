@@ -1,112 +1,137 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import SockJS from 'sockjs-client';
-import { Client, Stomp } from '@stomp/stompjs';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { TiArrowBackOutline } from "react-icons/ti";
 
-interface Message {
-    senderId: string;
-    content: string;
+interface Chat {
+    id: string;
+    userName: string;
 }
 
-const ChatsPage: React.FC = () => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
-    const [users, setUsers] = useState<{ id: string; participantName: string }[]>([]);
-    const chatAreaRef = useRef<HTMLDivElement>(null);
-    const stompClientRef = useRef<Client | null>(null);
-    const nickname = localStorage.getItem('nickname') || '';
-    const fullname = localStorage.getItem('fullname') || '';
+interface User {
+    id: string;
+    username: string;
+    role: string;
+}
+
+const ChatsPage = () => {
+    const [chats, setChats] = useState<Chat[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [showUsers, setShowUsers] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const socket = new SockJS('http://localhost:8081/ws');
-        const stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
-            stompClient.subscribe(`/user/${nickname}/queue/messages`, onMessageReceived);
-            stompClient.subscribe(`/user/public`, onMessageReceived);
-            stompClient.send('/app/user.addUser', {}, JSON.stringify({ nickName: nickname, fullName: fullname, status: 'ONLINE' }));
-        }, onError);
-        stompClientRef.current = stompClient;
+        fetchUserId();
+        const fetchChats = async () => {
+            try {
+                const response = await fetch(`http://localhost:8081/chats/get/${userId ? `?userId=${userId}` : ""}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                    setChats(data);
+                }
+            } catch (error) {
+                console.error("Error fetching chats:", error);
+            }
+        }
+        fetchChats();
+    }, []);
 
-        return () => {
-            stompClient.disconnect(() => {
-                stompClient.send('/app/user.disconnectUser', {}, JSON.stringify({ nickName: nickname, fullName: fullname, status: 'OFFLINE' }));
+    const fetchUserId = async () => {
+        try {
+            const response = await fetch("http://localhost:8081/users/me", {
+                method: "GET",
+                credentials: "include",
             });
-        };
-    }, [nickname, fullname]);
 
-    const onMessageReceived = (payload: any) => {
-        const message = JSON.parse(payload.body);
-        setMessages((prevMessages) => [...prevMessages, message]);
-        chatAreaRef.current?.scrollTo(0, chatAreaRef.current.scrollHeight);
-    };
-
-    const onError = () => {
-        console.error('Could not connect to WebSocket server. Please refresh this page to try again!');
-    };
-
-    const sendMessage = (event: React.FormEvent) => {
-        event.preventDefault();
-        if (newMessage.trim() && stompClientRef.current && selectedUser) {
-            const chatMessage = {
-                senderId: nickname,
-                recipientId: selectedUser,
-                content: newMessage,
-                timestamp: new Date(),
-            };
-            stompClientRef.current.publish({ destination: '/app/chat', body: JSON.stringify(chatMessage) });
-            setMessages((prevMessages) => [...prevMessages, chatMessage]);
-            setNewMessage('');
+            if (response.ok) {
+                const userData = await response.json();
+                setUserId(userData.userID);
+            } else {
+                console.error("Failed to fetch user ID");
+            }
+        } catch (error) {
+            console.error("Error fetching user ID:", error);
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('nickname');
-        localStorage.removeItem('fullname');
-        navigate('/');
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch("http://localhost:8081/users");
+            if (response.ok) {
+                const data = await response.json();
+                setUsers(data.filter((user: User) => user.id !== userId)); // Exclude the current user
+                setShowUsers(true);
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+    
+    const startChat = async (selectedUserId: string) => {
+
+        try {
+            const response = await fetch("http://localhost:8081/chats/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId1: userId,
+                    userId2: selectedUserId,
+                }),
+            });
+            if (response.ok) {
+                console.log("Chat started successfully");
+            }
+        } catch (error) {
+            console.error("Error starting chat:", error);
+        }
+        navigate(`/chat/${selectedUserId}`);
     };
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const response = await fetch('http://localhost:8081/users');
-            const data = await response.json();
-            setUsers(data);
-        };
-        fetchUsers();
-    }, []);
-
     return (
-        <div className="flex flex-col h-screen">
-            <div className="p-4 border-b">
-                <h2 className="text-xl font-bold mb-4">Online Users</h2>
-                <ul>
-                    {users.map((user) => (
-                        <li key={user.id} onClick={() => setSelectedUser(user.id)} className="flex items-center p-2 cursor-pointer hover:bg-gray-200">
-                            <img src="../img/user_icon.png" alt={user.participantName} className="w-10 h-10 rounded-full mr-2" />
-                            <span>{user.participantName}</span>
-                        </li>
-                    ))}
-                </ul>
+        <div className="max-w-2xl mx-auto p-4">
+            <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
+                <TiArrowBackOutline size={40} onClick={() => navigate("/home")} />
             </div>
-            <div className="flex-1 overflow-y-auto p-4" ref={chatAreaRef}>
-                {messages.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2 rounded ${msg.senderId === nickname ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-black self-start'}`}>
-                        <p>{msg.content}</p>
+            <h1 className="text-2xl font-bold mb-4">Chats</h1>
+
+            <button
+                className="bg-blue-500 text-white py-2 px-4 rounded mb-4"
+                onClick={fetchUsers}
+            >
+                Start New Chat
+            </button>
+
+            {showUsers && (
+                <div className="p-4 border rounded-lg bg-gray-100">
+                    <h2 className="text-lg font-bold mb-2">Select a user to chat with:</h2>
+                    <ul>
+                        {users.map((user) => (
+                            <li
+                                key={user.id}
+                                className="p-2 cursor-pointer hover:bg-gray-200 rounded"
+                                onClick={() => startChat(user.id)}
+                            >
+                                {user.username} ({user.role})
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <div className="space-y-3">
+                {chats.map((chat) => (
+                    <div
+                        key={chat.id}
+                        className="p-4 border rounded-lg shadow cursor-pointer hover:bg-gray-100"
+                        onClick={() => navigate(`/chat/${chat.id}`)} 
+                    >
+                        <p className="text-lg font-medium">{chat.userName}</p>
                     </div>
                 ))}
             </div>
-            <form onSubmit={sendMessage} className="flex p-4 border-t">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 p-2 border rounded"
-                />
-                <button type="submit" className="ml-2 p-2 bg-blue-500 text-white rounded">Send</button>
-            </form>
-            <button onClick={handleLogout} className="p-2 bg-red-500 text-white rounded">Logout</button>
         </div>
     );
 };
