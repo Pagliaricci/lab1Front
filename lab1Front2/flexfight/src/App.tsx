@@ -32,7 +32,7 @@ function App() {
         <Route path="/subscribe-to-course" element={<SubscribeToACourse />} />
         <Route path="/course-subs" element={<CourseSubscribers />} />
         <Route path="/chats" element={<ChatsPage />} />
-        <Route path="/chat/:id" element={<ChatPage />} />  
+        <Route path="/chat/:chatId" element={<ChatPage />} />
       </Routes>
     </div>
   );

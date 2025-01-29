@@ -4,7 +4,8 @@ import { TiArrowBackOutline } from "react-icons/ti";
 
 interface Chat {
     id: string;
-    userName: string;
+    user1Name: string;
+    user2Name: string;
 }
 
 interface User {
@@ -18,25 +19,28 @@ const ChatsPage = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [showUsers, setShowUsers] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchUserId();
         const fetchChats = async () => {
+            if (!userId) return; // Ensure userId is available
             try {
-                const response = await fetch(`http://localhost:8081/chats/get/${userId ? `?userId=${userId}` : ""}`);
+                const response = await fetch(`http://localhost:8081/chats/get/${userId}`);
                 if (response.ok) {
                     const data = await response.json();
                     console.log(data);
                     setChats(data);
+                } else {
+                    console.error("Failed to fetch chats:", response.statusText);
                 }
             } catch (error) {
                 console.error("Error fetching chats:", error);
             }
-        }
-        fetchChats();
-    }, []);
+        };
 
+        fetchUserId().then(fetchChats); // Ensure fetchUserId is called before fetchChats
+    }, [userId]);
     const fetchUserId = async () => {
         try {
             const response = await fetch("http://localhost:8081/users/me", {
@@ -47,6 +51,8 @@ const ChatsPage = () => {
             if (response.ok) {
                 const userData = await response.json();
                 setUserId(userData.userID);
+                setUsername(userData.username);
+                console.log(userData.username);
             } else {
                 console.error("Failed to fetch user ID");
             }
@@ -67,28 +73,36 @@ const ChatsPage = () => {
             console.error("Error fetching users:", error);
         }
     };
-    
-    const startChat = async (selectedUserId: string) => {
 
-        try {
-            const response = await fetch("http://localhost:8081/chats/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userId1: userId,
-                    userId2: selectedUserId,
-                }),
-            });
-            if (response.ok) {
-                console.log("Chat started successfully");
-            }
-        } catch (error) {
-            console.error("Error starting chat:", error);
+   const startChat = async (selectedUserId: string) => {
+    let chat: Chat = { id: "", user1Name: "", user2Name: "" };
+
+    try {
+        const response = await fetch("http://localhost:8081/chats/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user1Id: userId,
+                user2Id: selectedUserId,
+            }),
+        });
+        if (response.ok) {
+            console.log("Chat started successfully");
+            const chatId = await response.text(); // Read response as text
+            chat.id = chatId;
+            chat.user1Name = userId; // Assuming user1Name is the current user
+            chat.user2Name = selectedUserId; // Assuming user2Name is the selected user
+            console.log(chat);
+        } else {
+            console.error("Failed to start chat:", response.statusText);
         }
-        navigate(`/chat/${selectedUserId}`);
-    };
+    } catch (error) {
+        console.error("Error starting chat:", error);
+    }
+    navigate(`/chat/${chat.id}`);
+};
 
     return (
         <div className="max-w-2xl mx-auto p-4">
@@ -128,8 +142,7 @@ const ChatsPage = () => {
                         className="p-4 border rounded-lg shadow cursor-pointer hover:bg-gray-100"
                         onClick={() => navigate(`/chat/${chat.id}`)} 
                     >
-                        <p className="text-lg font-medium">{chat.userName}</p>
-                    </div>
+                        <p className="text-lg font-medium">{chat.user1Name === username ? chat.user2Name : chat.user1Name}</p>                    </div>
                 ))}
             </div>
         </div>
