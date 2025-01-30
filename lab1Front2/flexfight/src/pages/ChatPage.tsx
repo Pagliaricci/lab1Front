@@ -90,13 +90,6 @@ const ChatPage = () => {
                 }
                 // 🔥 Ajustar lógica para leer el mensaje en el formato "senderId:contenido"
                 const [senderId, messageContent] = event.data.split(":");
-                console.log("AJFWQJHFGQJW")
-                console.log(chat)
-                console.log("chatId", chatId);
-                console.log("senderId", senderId);
-                console.log("messageContent", messageContent);
-                console.log("userId", userId);
-                // 🟢 Crear un objeto de mensaje con el formato correcto
                 const newMessage: Message = {
                     id: Math.random().toString(), // Generar un ID temporal
                     chatId, // Usar el chatId actual
