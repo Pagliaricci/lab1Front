@@ -34,6 +34,7 @@ export interface FullProgressExercise {
     day: number;
     isDone: boolean;
     date: Date;
+    comments: string;
 }
 
 interface RoutineProgress {

@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "@stomp/stompjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0"
   }
 }

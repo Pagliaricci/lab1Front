@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {FullProgressExercise} from '../../pages/ActiveRoutine';
+import { FullProgressExercise } from '../../pages/ActiveRoutine';
 
 interface ExerciseCardProps {
     exercise: FullProgressExercise;
@@ -10,6 +10,7 @@ interface HistoryExercise {
     weight: number;
     reps: number;
     sets: number;
+    comment?: string;
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => {
@@ -21,9 +22,18 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
     const [history, setHistory] = useState<HistoryExercise | null>(null);
 
     useEffect(() => {
+        let interval: ReturnType<typeof setInterval> | null = null;
+
         if (isDone) {
             fetchExerciseHistory();
+
+            // Poll for updates every 5 seconds
+            interval = setInterval(fetchExerciseHistory, 5000);
         }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [isDone]);
 
     const fetchExerciseHistory = async () => {
@@ -38,8 +48,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
                     routineExerciseId: exercise.routineExerciseId,
                 }),
             });
+
             if (response.ok) {
                 const data: HistoryExercise = await response.json();
+                console.log(data)
                 setHistory(data);
             }
         } catch (error) {
@@ -73,15 +85,15 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
                 credentials: 'include',
                 body: JSON.stringify(completedExercise),
             });
+
             if (response.ok) {
                 setIsDone(true);
-                onComplete(); // Notify parent
+                onComplete();
             }
         } catch (error) {
             console.error('Error completing exercise:', error);
         }
     };
-
 
     return (
         <div className={`p-4 rounded-lg shadow-md flex flex-col justify-center space-y-4 ${isDone ? 'bg-green-500' : 'bg-gray-800'}`}>
@@ -106,6 +118,12 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
                         <p className="font-semibold text-lg">{history.weight} kg</p>
                         <p>Weight</p>
                     </div>
+                    {history.comment && (
+                        <div className="col-span-3 mt-2 p-2 bg-gray-700 rounded-lg">
+                            <h4 className="font-semibold text-yellow-300">Trainer comments:</h4>
+                            <p className="text-white">{history.comment}</p>
+                        </div>
+                    )}
                 </div>
             )}
 
