@@ -14,6 +14,39 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
     const [objectiveReached, setObjectiveReached] = useState(false);
     const [isShowned, setIsShowned] = useState(false);
 
+
+    const setObjectiveRecord = async (objectiveName: string, objectiveValue: number, currentValue: number) => {
+        if (!userId) {
+            console.error("Invalid parameter: userId is missing.");
+            return;
+        }
+
+        try {
+            console.log("Setting objective record", userId, objectiveName, objectiveValue, currentValue);
+            const response = await fetch('http://localhost:8081/api/rm/set-objective-record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    date: new Date().toISOString(), // Convert date to ISO string
+                    objectiveName,
+                    objectiveValue: objectiveValue.toString(),
+                    currentValue: currentValue.toString(),
+                }),
+            });
+
+
+            if (response.ok) {
+                console.log("Objective record set successfully");
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to set objective record:", errorText);
+            }
+        } catch (error) {
+            console.error("Error setting objective record:", error);
+        }
+    };
+    
     useEffect(() => {
         const fetchObjective = async () => {
             if (!userId) {
@@ -35,6 +68,8 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
                     console.log("Days trained this month:", daysTrainedThisMonth);
                     if (daysTrainedThisMonth >= Number(data)) {
                         setObjectiveReached(true);
+                        await setObjectiveRecord('Days trained Objective', daysTrainedThisMonth, Number(data));
+
                         if (!isShowned) {
                             toast.success(`Congratulations! You have reached your training objective of ${data} days for ${currentMonth}.`);
                             setIsShowned(true);

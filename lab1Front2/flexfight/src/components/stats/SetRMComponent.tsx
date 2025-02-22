@@ -120,6 +120,38 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
         }
     }, [userId]);
 
+    const setObjectiveRecord = async (objectiveName: string, objectiveValue: number, currentValue: number) => {
+        if (!userId) {
+            console.error("Invalid parameter: userId is missing.");
+            return;
+        }
+
+        try {
+            console.log("Setting objective record", userId, objectiveName, objectiveValue, currentValue);
+            const response = await fetch('http://localhost:8081/api/rm/set-objective-record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    date: new Date().toISOString(), // Convert date to ISO string
+                    objectiveName,
+                    objectiveValue: objectiveValue.toString(),
+                    currentValue: currentValue.toString(),
+                }),
+            });
+
+
+            if (response.ok) {
+                console.log("Objective record set successfully");
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to set objective record:", errorText);
+            }
+        } catch (error) {
+            console.error("Error setting objective record:", error);
+        }
+    };
+
     const setRMObjective = useCallback(async (exerciseId: string, objective: number) => {
         if (!userId || !exerciseId) {
             console.error("Invalid parameters: userId or exerciseId is missing.");
@@ -165,7 +197,8 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
         }
     }, [selectedExercise, fetchCurrentRM, fetchRMHistory]);
 
-    const handleSetRMClick = () => {
+
+    const handleSetRMClick = async () => {
         if (selectedExercise && reps && weight) {
             const newRM = Number(weight);
             onSetRM(selectedExercise.id, Number(reps), newRM);
@@ -179,7 +212,10 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
                     draggable: true,
                     progress: undefined,
                 });
+                console.log("AAAAAAAAAAA")
+                await setObjectiveRecord(`${selectedExercise.name} RM Objective`, newRM, Number(selectedExercise.objective));
                 setObjectiveReached(true);
+
             }
             setSelectedExercise(null);
             setReps('');

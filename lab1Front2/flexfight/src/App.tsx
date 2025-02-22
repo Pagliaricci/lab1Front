@@ -15,6 +15,8 @@ import CourseSubscribers from "./pages/CourseSubscribers";
 import ChatsPage from './pages/ChatsPage';
 import ChatPage from './pages/ChatPage';
 import RoutinePage from './pages/RoutinePage';
+import Achievements from './pages/Achievements';
+
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
         <Route path="/chats" element={<ChatsPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
         <Route path={"/:routineId"} element={<RoutinePage />} />
+        <Route path="/achievements" element={<Achievements />} />
+
       </Routes>
     </div>
   );

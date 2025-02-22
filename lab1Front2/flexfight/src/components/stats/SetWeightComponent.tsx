@@ -75,6 +75,38 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
         }
     }, [userId]);
 
+    const setObjectiveRecord = async (objectiveName: string, objectiveValue: number, currentValue: number) => {
+        if (!userId) {
+            console.error("Invalid parameter: userId is missing.");
+            return;
+        }
+
+        try {
+            console.log("Setting objective record", userId, objectiveName, objectiveValue, currentValue);
+            const response = await fetch('http://localhost:8081/api/rm/set-objective-record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId,
+                date: new Date().toISOString(), // Convert date to ISO string
+                objectiveName,
+                objectiveValue: objectiveValue.toString(),
+                currentValue: currentValue.toString(),
+            }),
+        });
+
+
+            if (response.ok) {
+                console.log("Objective record set successfully");
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to set objective record:", errorText);
+            }
+        } catch (error) {
+            console.error("Error setting objective record:", error);
+        }
+    };
+
     const fetchCurrentWeightObjective = useCallback(async () => {
         if (!userId) {
             console.error("Invalid parameter: userId is missing.");
@@ -144,6 +176,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
                             progress: undefined,
                         });
                         setObjectiveReached(true);
+                        await setObjectiveRecord('Weight Objective', currentWeightObjective, Number(weight));
                     } else {
                         toast.success(`Weight set successfully: ${weight} kg`, {
                             position: "top-right",
