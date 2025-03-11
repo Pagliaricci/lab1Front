@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TiArrowBackOutline } from 'react-icons/ti';
+import MercadoPagoButton from '../components/mercadoPago/ MercadoPagoButton';
+import { initMercadoPago } from '@mercadopago/sdk-react';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const PUBLIC_KEY = process.env.PUBLIC_KEY;
+
+
 
 interface Course {
     id: string;
@@ -18,9 +27,34 @@ const SubscribeToACourse: React.FC = () => {
     const [courses, setCourses] = useState<Course[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [preferenceId, setPreferenceId] = useState<string | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
+        
+        initMercadoPago(PUBLIC_KEY);
+        
+        
+        // Obtener la preferencia desde el backend
+        const createPreference = async () => {
+            try {
+                const response = await fetch('http://localhost:8081/payments/create-preference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId: "ID_DEL_CURSO", price: 100 }) // Personaliza estos datos
+                });
+
+                const data = await response.json();
+                setPreferenceId(data.preferenceId);
+            } catch (error) {
+                console.error('Error creating payment preference:', error);
+            }
+        };
+
+        createPreference();
+
         const fetchUserId = async () => {
             try {
                 const response = await fetch('http://localhost:8081/users/me', {
@@ -114,24 +148,36 @@ const SubscribeToACourse: React.FC = () => {
         }
     };
 
-    const handleSubscribe = async (courseId: string) => {
+    const handleSubscribe = async (course: Course) => {
         if (!userId) {
             alert('User ID not found. Please try again.');
             return;
         }
 
         try {
-            const response = await fetch('http://localhost:8081/course/subscribe', {
+            const response = await fetch('http://localhost:8081/payments/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, routineId: courseId }),
+                body: JSON.stringify({
+                    userId,
+                    title: course.name,
+                    price: course.price
+                }),
             });
+            // const response = await fetch('http://localhost:8081/course/subscribe', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ userId, routineId: courseId }),
+            // });
 
             if (response.ok) {
-                const updatedCourses = courses.map(course =>
-                    course.id === courseId ? { ...course, subscribed: true } : course
-                );
-                setCourses(updatedCourses);
+                const data = await response.json();
+                setPreferenceId(data.preferenceId);
+                setSelectedCourse(course.id);
+                // const updatedCourses = courses.map(course =>
+                //     course.id === courseId ? { ...course, subscribed: true } : course
+                // );
+                // setCourses(updatedCourses);
             } else {
                 console.error('Failed to subscribe to course');
             }
@@ -177,7 +223,7 @@ const SubscribeToACourse: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
             <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                <TiArrowBackOutline size={40} onClick={handleArrowBack}/>
+                <TiArrowBackOutline size={40} onClick={handleArrowBack} />
             </div>
             <h1 className="text-5xl font-bold text-white mb-8">Subscribe to a Course</h1>
             <div className="w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
@@ -214,12 +260,29 @@ const SubscribeToACourse: React.FC = () => {
                             <p className="text-gray-700 mb-2"><strong>Intensity:</strong> {course.intensity}</p>
                             <p className="text-gray-700 mb-2"><strong>Rating:</strong> {course.rating} / 5</p>
                             <p className="text-gray-700 mb-4"><strong>Price:</strong> ${course.price}</p>
-                            <button
-                                className={`py-2 px-4 rounded ${course.subscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white font-bold`}
-                                onClick={() => course.subscribed ? handleUnsubscribe(course.id) : handleSubscribe(course.id)}
-                            >
-                                {course.subscribed ? 'Unsubscribe' : 'Subscribe'}
-                            </button>
+                            {!course.subscribed ? (
+                                <button
+                                    className="py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
+                                    onClick={() => handleSubscribe(course)}
+                                >
+                                    Subscribe & Pay
+                                </button>
+                            ) : (
+                                <>
+                                    <p className="text-green-500 font-bold">Already Subscribed</p>
+                                    <button
+                                        className="py-2 px-4 bg-red-500 hover:bg-red-700 text-white font-bold rounded mt-2"
+                                        onClick={() => handleUnsubscribe(course.id)}
+                                    >
+                                        Unsubscribe
+                                    </button>
+                                </>
+                            )}
+                            {selectedCourse === course.id && preferenceId && (
+                                <div className="mt-4">
+                                    <MercadoPagoButton preferenceId={preferenceId} />
+                                </div>
+                            )}
                         </div>
                     ))
                 )}
