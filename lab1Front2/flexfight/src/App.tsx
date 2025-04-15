@@ -16,6 +16,8 @@ import ChatsPage from './pages/ChatsPage';
 import ChatPage from './pages/ChatPage';
 import RoutinePage from './pages/RoutinePage';
 import Achievements from './pages/Achievements';
+import CheckoutSuccess from './components/mercadoPago/CheckoutSuccess';
+
 
 
 function App() {
@@ -38,6 +40,7 @@ function App() {
         <Route path="/chat/:chatId" element={<ChatPage />} />
         <Route path={"/:routineId"} element={<RoutinePage />} />
         <Route path="/achievements" element={<Achievements />} />
+        <Route path="/checkout-success" element={<CheckoutSuccess />} />
 
       </Routes>
     </div>

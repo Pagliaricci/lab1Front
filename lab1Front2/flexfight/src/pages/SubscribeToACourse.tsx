@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TiArrowBackOutline } from 'react-icons/ti';
-import MercadoPagoButton from '../components/mercadoPago/ MercadoPagoButton';
+// import MercadoPagoButton from '../components/mercadoPago/ MercadoPagoButton';
 import { initMercadoPago } from '@mercadopago/sdk-react';
-import dotenv from 'dotenv';
+import { Wallet } from '@mercadopago/sdk-react';
 
-dotenv.config();
 
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
@@ -33,27 +32,8 @@ const SubscribeToACourse: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        
+
         initMercadoPago(PUBLIC_KEY);
-        
-        
-        // Obtener la preferencia desde el backend
-        const createPreference = async () => {
-            try {
-                const response = await fetch('http://localhost:8081/payments/create-preference', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ courseId: "ID_DEL_CURSO", price: 100 }) // Personaliza estos datos
-                });
-
-                const data = await response.json();
-                setPreferenceId(data.preferenceId);
-            } catch (error) {
-                console.error('Error creating payment preference:', error);
-            }
-        };
-
-        createPreference();
 
         const fetchUserId = async () => {
             try {
@@ -155,13 +135,15 @@ const SubscribeToACourse: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/payments/create', {
+            localStorage.setItem("courseToSubscribe", course.id);
+            localStorage.setItem("userId", userId);
+            const response = await fetch('http://localhost:8081/api/pagos/crear', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId,
-                    title: course.name,
-                    price: course.price
+                    titulo: course.name,
+                    precio: course.price
                 }),
             });
             // const response = await fetch('http://localhost:8081/course/subscribe', {
@@ -280,7 +262,7 @@ const SubscribeToACourse: React.FC = () => {
                             )}
                             {selectedCourse === course.id && preferenceId && (
                                 <div className="mt-4">
-                                    <MercadoPagoButton preferenceId={preferenceId} />
+                                    <Wallet initialization={{ preferenceId: preferenceId }} />
                                 </div>
                             )}
                         </div>
