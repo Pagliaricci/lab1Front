@@ -153,15 +153,12 @@ const SubscribeToACourse: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/payments/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId,
-                    title: course.name,
-                    price: course.price
-                }),
-            });
+            const response = await fetch(`http://localhost:8081/api/pagos/preferencia?courseId=${course.id}&precio=${course.price}&userId=${userId}`, {
+                method: "POST",
+                credentials: 'include',
+              });
+              const data = await response.json();
+              window.location.href = data.init_point;
             // const response = await fetch('http://localhost:8081/course/subscribe', {
             //     method: 'POST',
             //     headers: { 'Content-Type': 'application/json' },
