@@ -281,6 +281,28 @@ const ActiveRoutine: React.FC = () => {
                             <div className="bg-blue-500 text-white p-4 rounded-lg text-center shadow-lg">
                                 <h3 className="text-xl font-bold">Good Job!</h3>
                                 <p>All exercises done for the day.</p>
+                                <div className="mt-4 flex justify-center space-x-4">
+                                    <a
+                                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                                            `I completed ${progressExercises[routineProgress.day]?.length || 0} exercises today! 💪 #FitnessJourney #FlexFight`
+                                        )}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="py-2 px-4 bg-blue-400 hover:bg-blue-600 text-white font-bold rounded"
+                                    >
+                                        Share on X
+                                    </a>
+                                    <a
+                                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                                            `https://yourwebsite.com?exercisesDone=${progressExercises[routineProgress.day]?.length || 0}`
+                                        )}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="py-2 px-4 bg-blue-700 hover:bg-blue-900 text-white font-bold rounded"
+                                    >
+                                        Share on Facebook
+                                    </a>
+                                </div>
                             </div>
                         )}
                         {allRoutineExercisesDone && (

@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { TiArrowBackOutline } from 'react-icons/ti';
 import MercadoPagoButton from '../components/mercadoPago/ MercadoPagoButton';
 import { initMercadoPago } from '@mercadopago/sdk-react';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
-const PUBLIC_KEY = process.env.PUBLIC_KEY;
 
+const PUBLIC_KEY = "APP_USR-3e188254-32d7-4d42-8a0a-9172aa804a90";
 
 
 interface Course {
