@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { TiArrowBackOutline } from 'react-icons/ti';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import SetRMComponent from '../components/stats/SetRMComponent';
 import SetWeightComponent from '../components/stats/SetWeightComponent';
 import DaysTrainedObjective from '../components/stats/DaysTrainedObjective';
-
-const localizer = momentLocalizer(moment);
 
 const Statistics: React.FC = () => {
     const navigate = useNavigate();
@@ -17,6 +14,16 @@ const Statistics: React.FC = () => {
     const [userHeight, setUserHeight] = useState<number | null>(null);
     const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
     const [trainingDaysByMonth, setTrainingDaysByMonth] = useState<{ [key: string]: number }>({});
+    const [activeTab, setActiveTab] = useState('overview');
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [exercisesForDate, setExercisesForDate] = useState<any[]>([]);
+
+    const tabs = [
+        { id: 'overview', label: 'Training Overview', icon: '📊' },
+        { id: 'maxrep', label: 'Max Rep', icon: '💪' },
+        { id: 'weight', label: 'Weight', icon: '⚖️' },
+        { id: 'bmi', label: 'BMI', icon: '📏' }
+    ];
 
     const handleArrowBack = () => {
         navigate('/home');
@@ -152,50 +159,291 @@ const Statistics: React.FC = () => {
     const currentMonthKey = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
     const daysTrainedThisMonth = trainingDaysByMonth[currentMonthKey] || 0;
 
+    // Calendar functions
+    const handleDateClick = (value: Date) => {
+        setSelectedDate(value);
+        const dateString = value.toDateString();
+        const exercisesOnDate = exercises.filter(exercise => 
+            new Date(exercise.date).toDateString() === dateString
+        );
+        setExercisesForDate(exercisesOnDate);
+    };
+
+    const tileClassName = ({ date }: { date: Date }) => {
+        const dateString = date.toDateString();
+        const hasExercises = exercises.some(exercise => 
+            new Date(exercise.date).toDateString() === dateString
+        );
+        return hasExercises ? 'training-day' : '';
+    };
+
     return (
-        <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
-            <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                <TiArrowBackOutline size={40} onClick={handleArrowBack} />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 relative">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200/20 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200/15 rounded-full blur-3xl"></div>
+                <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-amber-200/10 rounded-full blur-2xl"></div>
             </div>
-            <h1 className="text-5xl font-bold text-white mb-8">Your Fitness Statistics</h1>
-            <div className="flex w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
-                <div className="w-1/4 bg-gray-200 rounded-lg p-4 mr-4">
-                    <h2 className="text-xl font-semibold mb-2">Training Days by Month</h2>
-                    {Object.keys(trainingDaysByMonth).map(month => (
-                        <p key={month}>
-                            <strong>{formatMonth(month)}:</strong> {trainingDaysByMonth[month]} {trainingDaysByMonth[month] === 1 ? 'day' : 'days'}
-                        </p>
-                    ))}
-                    {selectedExercise && (
-                        <div className="mt-4 bg-gray-300 rounded-lg p-4">
-                            <h2 className="text-xl font-semibold mb-2">Exercise Details</h2>
-                            <p><strong>Name:</strong> {selectedExercise.exerciseName}</p>
-                            <p><strong>Reps:</strong> {selectedExercise.reps}</p>
-                            <p><strong>Sets:</strong> {selectedExercise.sets}</p>
-                            <p><strong>Weight (Kg):</strong> {selectedExercise.weight}</p>
+
+            {/* Back Button */}
+            <div className="absolute top-6 left-6 z-10">
+                <button
+                    onClick={handleArrowBack}
+                    className="w-12 h-12 bg-white/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-orange-200/30"
+                >
+                    <TiArrowBackOutline className="text-xl text-orange-600" />
+                </button>
+            </div>
+
+            <div className="flex flex-col items-center min-h-screen p-6 pt-20">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-orange-600 mb-2">Your Fitness Statistics</h1>
+                    <p className="text-gray-600">Track your progress and achievements</p>
+                </div>
+
+                {/* Tabs Navigation */}
+                <div className="w-full max-w-4xl mb-6">
+                    <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-2 border border-orange-100/50">
+                        <div className="flex space-x-1">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+                                        activeTab === tab.id
+                                            ? 'bg-orange-500 text-white shadow-md'
+                                            : 'text-gray-600 hover:bg-orange-50'
+                                    }`}
+                                >
+                                    <span className="text-lg">{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tab Content */}
+                <div className="w-full max-w-6xl">
+                    {/* Training Overview Tab */}
+                    {activeTab === 'overview' && (
+                        <div className="space-y-6">
+                            {/* Training Overview Section */}
+                            <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Training Overview</h2>
+                                
+                                {/* Monthly Stats Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                    <div className="bg-blue-50/80 rounded-lg p-4 border border-blue-200/50">
+                                        <h3 className="text-sm font-medium text-blue-600 mb-1">This Month</h3>
+                                        <p className="text-2xl font-bold text-blue-800">{daysTrainedThisMonth} days</p>
+                                    </div>
+                                    <div className="bg-orange-50/80 rounded-lg p-4 border border-orange-200/50">
+                                        <h3 className="text-sm font-medium text-orange-600 mb-1">Total Sessions</h3>
+                                        <p className="text-2xl font-bold text-orange-800">{exercises.length}</p>
+                                    </div>
+                                    <div className="bg-green-50/80 rounded-lg p-4 border border-green-200/50">
+                                        <h3 className="text-sm font-medium text-green-600 mb-1">Active Months</h3>
+                                        <p className="text-2xl font-bold text-green-800">{Object.keys(trainingDaysByMonth).length}</p>
+                                    </div>
+                                    <div className="bg-purple-50/80 rounded-lg p-4 border border-purple-200/50">
+                                        <h3 className="text-sm font-medium text-purple-600 mb-1">Average/Month</h3>
+                                        <p className="text-2xl font-bold text-purple-800">
+                                            {Object.keys(trainingDaysByMonth).length > 0 ? 
+                                                Math.round(Object.values(trainingDaysByMonth).reduce((a, b) => a + b, 0) / Object.keys(trainingDaysByMonth).length) 
+                                                : 0} days
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Monthly Breakdown */}
+                                <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-200/50">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Training Days by Month</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {Object.keys(trainingDaysByMonth).sort().reverse().map(month => (
+                                            <div key={month} className="bg-white/80 rounded-lg p-3 border border-gray-200/30">
+                                                <p className="text-sm font-medium text-gray-600">{formatMonth(month)}</p>
+                                                <p className="text-lg font-bold text-gray-800">
+                                                    {trainingDaysByMonth[month]} {trainingDaysByMonth[month] === 1 ? 'day' : 'days'}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Calendar Section */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Training Calendar */}
+                                <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                                    <h2 className="text-xl font-bold text-gray-800 mb-4">Training Calendar</h2>
+                                    <p className="text-sm text-gray-600 mb-4">Click on a date to see exercises for that day. Training days are highlighted in orange.</p>
+                                    
+                                    <div className="calendar-container">
+                                        <Calendar
+                                            onClickDay={handleDateClick}
+                                            tileClassName={tileClassName}
+                                            value={selectedDate}
+                                            className="custom-calendar"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Exercises for Selected Date */}
+                                <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                                    <h2 className="text-xl font-bold text-gray-800 mb-4">
+                                        {selectedDate ? `Exercises for ${selectedDate.toLocaleDateString()}` : 'Select a Date'}
+                                    </h2>
+                                    
+                                    {selectedDate && exercisesForDate.length > 0 ? (
+                                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                                            {exercisesForDate.map((exercise, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="bg-white/80 backdrop-blur-lg p-4 rounded-lg border border-orange-200/30 cursor-pointer hover:bg-orange-50/50 transition-colors duration-200"
+                                                    onClick={() => setSelectedExercise(exercise)}
+                                                >
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <p className="font-semibold text-gray-800">{exercise.exerciseName}</p>
+                                                                <p className="text-sm text-gray-600">{new Date(exercise.date).toLocaleTimeString()}</p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                                                    {exercise.sets}×{exercise.reps}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                                                {exercise.weight} kg
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">Click for details</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : selectedDate && exercisesForDate.length === 0 ? (
+                                        <div className="text-center py-8">
+                                            <p className="text-gray-500">No exercises recorded for this date</p>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <p className="text-gray-500">Click on a date in the calendar to see your exercises</p>
+                                            <p className="text-sm text-orange-600 mt-2">Orange highlighted dates have training sessions</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Exercise Details Section */}
+                            {selectedExercise && (
+                                <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                                    <h2 className="text-xl font-bold text-gray-800 mb-4">Exercise Details</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div className="bg-blue-50/80 rounded-lg p-3 border border-blue-200/50">
+                                            <p className="text-sm font-medium text-blue-600">Exercise</p>
+                                            <p className="text-blue-800 font-semibold">{selectedExercise.exerciseName}</p>
+                                        </div>
+                                        <div className="bg-orange-50/80 rounded-lg p-3 border border-orange-200/50">
+                                            <p className="text-sm font-medium text-orange-600">Sets</p>
+                                            <p className="text-orange-800 font-semibold">{selectedExercise.sets}</p>
+                                        </div>
+                                        <div className="bg-green-50/80 rounded-lg p-3 border border-green-200/50">
+                                            <p className="text-sm font-medium text-green-600">Reps</p>
+                                            <p className="text-green-800 font-semibold">{selectedExercise.reps}</p>
+                                        </div>
+                                        <div className="bg-purple-50/80 rounded-lg p-3 border border-purple-200/50">
+                                            <p className="text-sm font-medium text-purple-600">Weight</p>
+                                            <p className="text-purple-800 font-semibold">{selectedExercise.weight} kg</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedExercise(null)}
+                                        className="mt-4 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+                                    >
+                                        Close Details
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Training Days Objective */}
+                            <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                                <DaysTrainedObjective userId={userId} trainingDaysByMonth={trainingDaysByMonth} daysTrainedThisMonth={daysTrainedThisMonth}/>
+                            </div>
                         </div>
                     )}
-                </div>
-                <div className="w-3/4">
-                    <Calendar
-                        localizer={localizer}
-                        events={events}
-                        startAccessor="start"
-                        endAccessor="end"
-                        style={{ height: 500 }}
-                        onSelectEvent={handleSelectEvent}
-                    />
-                </div>
-            </div>
-            <div className="flex w-full max-w-4xl mt-8 space-x-4">
-                <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
-                    <SetRMComponent onSetRM={handleSetRM} userId={userId}/>
-                </div>
-                <div className="w-1/2 bg-white p-4 rounded-lg shadow-lg">
-                    <SetWeightComponent userId={userId} userHeight={userHeight}/>
-                </div>
-                <div className="w-full max-w-4xl mt-8">
-                    <DaysTrainedObjective userId={userId} trainingDaysByMonth={trainingDaysByMonth} daysTrainedThisMonth={daysTrainedThisMonth}/>
+
+                    {/* Max Rep Tab */}
+                    {activeTab === 'maxrep' && (
+                        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-orange-100/50 overflow-hidden">
+                            <SetRMComponent onSetRM={handleSetRM} userId={userId}/>
+                        </div>
+                    )}
+
+                    {/* Weight Tab */}
+                    {activeTab === 'weight' && (
+                        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl border border-orange-100/50 overflow-hidden">
+                            <SetWeightComponent userId={userId} userHeight={userHeight}/>
+                        </div>
+                    )}
+
+                    {/* BMI Tab */}
+                    {activeTab === 'bmi' && (
+                        <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 border border-orange-100/50">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">BMI Calculator & Tracking</h2>
+                            
+                            {userHeight && (
+                                <div className="space-y-6">
+                                    {/* BMI Calculator */}
+                                    <div className="bg-blue-50/80 rounded-lg p-6 border border-blue-200/50">
+                                        <h3 className="text-xl font-semibold text-blue-800 mb-4">BMI Information</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-blue-600">Your Height</p>
+                                                <p className="text-2xl font-bold text-blue-800">{userHeight} cm</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-blue-600">BMI Formula</p>
+                                                <p className="text-sm text-blue-700">Weight (kg) / Height² (m)</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-blue-600">BMI Categories</p>
+                                                <div className="text-xs text-blue-700 space-y-1">
+                                                    <p>Underweight: &lt; 18.5</p>
+                                                    <p>Normal: 18.5 - 24.9</p>
+                                                    <p>Overweight: 25 - 29.9</p>
+                                                    <p>Obese: ≥ 30</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* BMI will be calculated automatically with weight data */}
+                                    <div className="bg-orange-50/80 rounded-lg p-6 border border-orange-200/50">
+                                        <h3 className="text-xl font-semibold text-orange-800 mb-4">Track Your Weight</h3>
+                                        <p className="text-orange-700 mb-4">Your BMI will be automatically calculated when you log your weight in the Weight tab.</p>
+                                        <button
+                                            onClick={() => setActiveTab('weight')}
+                                            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
+                                        >
+                                            Go to Weight Tracking
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {!userHeight && (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500">Height information not available. Please update your profile.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
