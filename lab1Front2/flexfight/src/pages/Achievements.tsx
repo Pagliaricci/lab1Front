@@ -54,27 +54,64 @@ const Achievements = () => {
     }, []);
 
     return (
-        <div className="relative min-h-screen bg-gray-800">
-            <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                <TiArrowBackOutline size={40} onClick={() => navigate("/home")} />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 relative">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200/20 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200/15 rounded-full blur-3xl"></div>
+                <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-amber-200/10 rounded-full blur-2xl"></div>
             </div>
-            <div className="flex flex-col items-center justify-center min-h-screen text-center text-white">
-                <h1 className="text-5xl font-bold mb-4">Achievements</h1>
-                <p className="text-xl mb-8">Stay consistent, and success will follow!</p>
-                {achievements.length > 0 ? (
-                    <div className="w-full max-w-2xl bg-white bg-opacity-65 p-8 rounded-lg shadow-md">
-                        {achievements.map((achievement) => (
-                            <div key={achievement.id} className="mb-4 p-4 border-b border-gray-300">
-                                <p className="text-lg font-bold">{achievement.objectiveName}</p>
-                                <p>Date: {achievement.date}</p>
-                                <p>Objective Value: {achievement.objectiveValue}</p>
-                                <p>Current Value: {achievement.currentValue}</p>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p>No achievements found.</p>
-                )}
+
+            {/* Back Button */}
+            <div className="absolute top-6 left-6 z-10">
+                <button
+                    onClick={() => navigate("/home")}
+                    className="w-12 h-12 bg-white/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-orange-200/30"
+                >
+                    <TiArrowBackOutline className="text-xl text-orange-600" />
+                </button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center min-h-screen p-6">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-orange-600 mb-2">Achievements</h1>
+                    <p className="text-gray-600">Stay consistent, and success will follow!</p>
+                </div>
+
+                {/* Content */}
+                <div className="w-full max-w-4xl bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-8 border border-orange-100/50">
+                    {achievements.length > 0 ? (
+                        <div className="space-y-4">
+                            {achievements.map((achievement) => (
+                                <div key={achievement.id} className="bg-white/80 backdrop-blur-lg p-6 rounded-xl border border-orange-200/30 shadow-sm">
+                                    <div className="space-y-3">
+                                        <h3 className="text-xl font-bold text-gray-800">{achievement.objectiveName}</h3>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="bg-blue-50/80 rounded-lg p-3 border border-blue-200/50">
+                                                <p className="text-sm font-medium text-blue-600">Date</p>
+                                                <p className="text-blue-800 font-semibold">{new Date(achievement.date).toLocaleDateString()}</p>
+                                            </div>
+                                            <div className="bg-orange-50/80 rounded-lg p-3 border border-orange-200/50">
+                                                <p className="text-sm font-medium text-orange-600">Objective Value</p>
+                                                <p className="text-orange-800 font-semibold">{achievement.objectiveValue}</p>
+                                            </div>
+                                            <div className="bg-green-50/80 rounded-lg p-3 border border-green-200/50">
+                                                <p className="text-sm font-medium text-green-600">Current Value</p>
+                                                <p className="text-green-800 font-semibold">{achievement.currentValue}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-6">
+                            <p className="text-gray-500 text-lg">No achievements found.</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

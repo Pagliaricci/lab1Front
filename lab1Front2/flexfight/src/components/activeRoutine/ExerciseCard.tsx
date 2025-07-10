@@ -96,32 +96,32 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
     };
 
     return (
-        <div className={`p-4 rounded-lg shadow-md flex flex-col justify-center space-y-4 ${isDone ? 'bg-green-500' : 'bg-gray-800'}`}>
+        <div className={`p-4 rounded-xl shadow-md flex flex-col justify-center space-y-4 border ${isDone ? 'bg-green-50/80 border-green-200/50' : 'bg-white/80 backdrop-blur-lg border-orange-200/30'}`}>
             <div className="text-center">
-                <h3 className={`text-xl font-semibold ${isDone ? 'text-white' : 'text-gray-300'}`}>
+                <h3 className={`text-xl font-semibold ${isDone ? 'text-green-700' : 'text-gray-800'}`}>
                     {exercise.name}
                 </h3>
-                {isDone && <p className="text-sm font-medium text-gray-200">Exercise Completed!</p>}
+                {isDone && <p className="text-sm font-medium text-green-600">Exercise Completed!</p>}
             </div>
 
             {isDone && history && (
-                <div className="grid grid-cols-3 gap-4 text-center text-white text-sm">
+                <div className="grid grid-cols-3 gap-4 text-center text-sm">
                     <div>
-                        <p className="font-semibold text-lg">{history.sets}</p>
-                        <p>Sets</p>
+                        <p className="font-semibold text-lg text-green-700">{history.sets}</p>
+                        <p className="text-gray-600">Sets</p>
                     </div>
                     <div>
-                        <p className="font-semibold text-lg">{history.reps}</p>
-                        <p>Reps</p>
+                        <p className="font-semibold text-lg text-green-700">{history.reps}</p>
+                        <p className="text-gray-600">Reps</p>
                     </div>
                     <div>
-                        <p className="font-semibold text-lg">{history.weight} kg</p>
-                        <p>Weight</p>
+                        <p className="font-semibold text-lg text-green-700">{history.weight} kg</p>
+                        <p className="text-gray-600">Weight</p>
                     </div>
                     {history.comment && (
-                        <div className="col-span-3 mt-2 p-2 bg-gray-700 rounded-lg">
-                            <h4 className="font-semibold text-yellow-300">Trainer comments:</h4>
-                            <p className="text-white">{history.comment}</p>
+                        <div className="col-span-3 mt-2 p-2 bg-blue-50/80 rounded-lg border border-blue-200/50">
+                            <h4 className="font-semibold text-blue-700">Trainer comments:</h4>
+                            <p className="text-blue-600">{history.comment}</p>
                         </div>
                     )}
                 </div>
@@ -130,17 +130,17 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
             {!isDone && (
                 <>
                     <button
-                        className="text-blue-400 text-sm hover:text-blue-500 transition duration-300"
+                        className="text-blue-500 text-sm hover:text-blue-600 transition duration-300 font-medium"
                         onClick={toggleDescription}
                     >
                         {isDescriptionVisible ? 'Hide details' : 'View details'}
                     </button>
                     {isDescriptionVisible && (
-                        <p className="bg-gray-700 text-sm text-gray-200 p-2 rounded-lg">
+                        <p className="bg-blue-50/50 text-sm text-gray-700 p-3 rounded-lg border border-blue-200/30">
                             {exercise.description}
                         </p>
                     )}
-                    <p className="text-gray-300">
+                    <p className="text-gray-600 font-medium">
                         Target: {exercise.sets} sets x {exercise.reps} reps
                     </p>
                     <div className="grid grid-cols-3 gap-2">
@@ -149,25 +149,25 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
                             value={sets}
                             onChange={handleInputChange(setSets)}
                             placeholder="Sets"
-                            className="w-full p-1 rounded bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
                         <input
                             type="number"
                             value={reps}
                             onChange={handleInputChange(setReps)}
                             placeholder="Reps"
-                            className="w-full p-1 rounded bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
                         <input
                             type="number"
                             value={weight}
                             onChange={handleInputChange(setWeight)}
                             placeholder="Weight (kg)"
-                            className="w-full p-1 rounded bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
                     </div>
                     <button
-                        className="w-full bg-green-500 text-white py-1 rounded-lg hover:bg-green-600 shadow-md transition duration-300"
+                        className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 shadow-md transition duration-300 font-semibold"
                         onClick={handleCompleteExercise}
                     >
                         Mark as Complete
@@ -176,7 +176,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onComplete }) => 
             )}
 
             {!isDone && (
-                <p className="text-sm font-medium text-yellow-400">
+                <p className="text-sm font-medium text-orange-500">
                     Pending
                 </p>
             )}

@@ -2,9 +2,14 @@ import LoginFormsComponent from '../components/login/LoginFormsComponent';
 
 function Login() {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-xs">
-                <h1 className="py-10 text-center text-2xl font-bold">Login</h1>
+        <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-orange-600 mb-2">
+                        Welcome Back
+                    </h1>
+                    <p className="text-gray-600">Sign in to continue your fitness journey</p>
+                </div>
                 <LoginFormsComponent />
             </div>
         </div>
