@@ -55,26 +55,28 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
     };
 
     return (
-        <div className="w-full border rounded-lg shadow-md mb-4 overflow-hidden">
+        <div className="w-full border border-orange-200 rounded-xl shadow-lg mb-4 overflow-hidden bg-white">
             <div
-                className="p-4 bg-blue-500 text-white font-bold cursor-pointer flex justify-between items-center"
+                className="p-4 bg-orange-500 text-white font-bold cursor-pointer flex justify-between items-center hover:bg-orange-600 transition-colors duration-200"
                 onClick={toggleExpand}
             >
                 <span>Week {weekNumber}</span>
                 <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>▼</span>
             </div>
             {isExpanded && (
-                <div className="pl-2 pr-2 pt-4 pb-4 bg-gray-100">
+                <div className="p-4 bg-orange-50/50">
                     <div className="grid grid-cols-7 gap-2">
                         {daysOfWeek.map((day, index) => (
                             <div key={index} className="flex flex-col items-center">
                                 <div
-                                    className={`w-8 h-8 flex items-center justify-center border rounded-lg cursor-pointer transition-all duration-200 ease-in-out ${
-                                        selectedDay === index ? 'bg-blue-200 border-blue-500' : 'bg-white'
+                                    className={`w-10 h-10 flex items-center justify-center border-2 rounded-lg cursor-pointer transition-all duration-200 ease-in-out font-semibold ${
+                                        selectedDay === index 
+                                            ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md' 
+                                            : 'bg-white border-gray-300 hover:border-blue-300 hover:bg-blue-50'
                                     }`}
                                     onClick={() => handleDayClick(index)}
                                 >
-                                    {completedExercises[index] ? <FaCheck className="text-green-500" /> : day}
+                                    {completedExercises[index] ? <FaCheck className="text-blue-500" /> : day}
                                 </div>
                             </div>
                         ))}
@@ -84,16 +86,16 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
                             {completedExercises[selectedDay] ? (
                                 <div className="flex flex-wrap justify-center gap-4">
                                     {completedExercises[selectedDay].map((exercise, idx) => (
-                                        <div key={idx} className="p-2 bg-gray-200 text-center rounded-lg shadow-sm w-32">
-                                            <div className="font-bold">{exercise.name}</div>
-                                            <div className="text-sm">Series: {exercise.series}</div>
-                                            <div className="text-sm">Reps: {exercise.reps}</div>
+                                        <div key={idx} className="p-3 bg-white border border-blue-200 text-center rounded-xl shadow-sm w-32 hover:shadow-md transition-shadow duration-200">
+                                            <div className="font-bold text-gray-800">{exercise.name}</div>
+                                            <div className="text-sm text-gray-600">Series: {exercise.series}</div>
+                                            <div className="text-sm text-gray-600">Reps: {exercise.reps}</div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <button
-                                    className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm"
+                                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
                                     onClick={handleAddTrainingClick}
                                 >
                                     Add training

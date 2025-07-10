@@ -219,71 +219,140 @@ const SubscribeToACourse: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
-            <div className="absolute top-4 left-4 transition-transform duration-300 transform hover:scale-110">
-                <TiArrowBackOutline size={40} onClick={handleArrowBack} />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 relative">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200/20 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200/15 rounded-full blur-3xl"></div>
+                <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-amber-200/10 rounded-full blur-2xl"></div>
             </div>
-            <h1 className="text-5xl font-bold text-white mb-8">Subscribe to a Course</h1>
-            <div className="w-full max-w-4xl bg-white p-4 rounded-lg shadow-lg">
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-2 border rounded-lg"
-                        placeholder="Search for courses..."
-                    />
-                    <button
-                        onClick={handleSearch}
-                        className="mt-2 py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
-                    >
-                        Search
-                    </button>
-                    <button
-                        onClick={sortCoursesByRating}
-                        className="mt-2 ml-2 py-2 px-4 bg-green-500 hover:bg-green-700 text-white font-bold rounded"
-                    >
-                        Sort by Rating
-                    </button>
+
+            {/* Back Button */}
+            <div className="absolute top-6 left-6 z-10">
+                <button
+                    onClick={handleArrowBack}
+                    className="w-12 h-12 bg-white/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-orange-200/30"
+                >
+                    <TiArrowBackOutline className="text-xl text-orange-600" />
+                </button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center min-h-screen p-6">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-orange-600 mb-2">Subscribe to a Course</h1>
+                    <p className="text-gray-600">Find and subscribe to fitness courses</p>
                 </div>
-                {courses.length === 0 ? (
-                    <p className="text-gray-400">No courses available.</p>
-                ) : (
-                    courses.map(course => (
-                        <div key={course.id} className="p-4 mb-4 border rounded-lg bg-gray-100 shadow-inner">
-                            <h2 className="text-2xl font-bold mb-2">{course.name}</h2>
-                            <p className="text-gray-700 mb-2">{course.description}</p>
-                            <p className="text-gray-700 mb-2"><strong>Creator:</strong> {course.creator}</p>
-                            <p className="text-gray-700 mb-2"><strong>Duration:</strong> {course.duration} weeks</p>
-                            <p className="text-gray-700 mb-2"><strong>Intensity:</strong> {course.intensity}</p>
-                            <p className="text-gray-700 mb-2"><strong>Rating:</strong> {course.rating} / 5</p>
-                            <p className="text-gray-700 mb-4"><strong>Price:</strong> ${course.price}</p>
-                            {!course.subscribed ? (
-                                <button
-                                    className="py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
-                                    onClick={() => handleSubscribe(course)}
-                                >
-                                    Subscribe & Pay
-                                </button>
-                            ) : (
-                                <>
-                                    <p className="text-green-500 font-bold">Already Subscribed</p>
-                                    <button
-                                        className="py-2 px-4 bg-red-500 hover:bg-red-700 text-white font-bold rounded mt-2"
-                                        onClick={() => handleUnsubscribe(course.id)}
-                                    >
-                                        Unsubscribe
-                                    </button>
-                                </>
-                            )}
-                            {selectedCourse === course.id && preferenceId && (
-                                <div className="mt-4">
-                                    <MercadoPagoButton preferenceId={preferenceId} />
-                                </div>
-                            )}
+
+                <div className="w-full max-w-4xl bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-8 border border-orange-100/50">
+                    {/* Search Section */}
+                    <div className="space-y-4 mb-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 block">Search Courses</label>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                                placeholder="Search for courses..."
+                            />
                         </div>
-                    ))
-                )}
+                        
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleSearch}
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
+                            >
+                                Search
+                            </button>
+                            <button
+                                onClick={sortCoursesByRating}
+                                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
+                            >
+                                Sort by Rating
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Courses List */}
+                    {courses.length === 0 ? (
+                        <div className="text-center py-6">
+                            <p className="text-gray-500 text-lg">No courses available.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            {courses.map(course => (
+                                <div key={course.id} className="bg-white/80 backdrop-blur-lg p-6 rounded-xl border border-orange-200/30 shadow-sm">
+                                    <div className="space-y-4">
+                                        {/* Course Header */}
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{course.name}</h2>
+                                            <p className="text-gray-600">{course.description}</p>
+                                        </div>
+
+                                        {/* Course Details Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="bg-blue-50/80 rounded-lg p-3 border border-blue-200/50">
+                                                <p className="text-sm font-medium text-blue-600">Creator</p>
+                                                <p className="text-blue-800 font-semibold">{course.creator}</p>
+                                            </div>
+                                            <div className="bg-orange-50/80 rounded-lg p-3 border border-orange-200/50">
+                                                <p className="text-sm font-medium text-orange-600">Duration</p>
+                                                <p className="text-orange-800 font-semibold">{course.duration} weeks</p>
+                                            </div>
+                                            <div className="bg-green-50/80 rounded-lg p-3 border border-green-200/50">
+                                                <p className="text-sm font-medium text-green-600">Intensity</p>
+                                                <p className="text-green-800 font-semibold">{course.intensity}</p>
+                                            </div>
+                                            <div className="bg-purple-50/80 rounded-lg p-3 border border-purple-200/50">
+                                                <p className="text-sm font-medium text-purple-600">Rating</p>
+                                                <p className="text-purple-800 font-semibold">{course.rating} / 5</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Price and Actions */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-200/50">
+                                            <div className="bg-gray-50/80 rounded-lg px-4 py-2 border border-gray-200/50">
+                                                <p className="text-sm font-medium text-gray-600">Price</p>
+                                                <p className="text-2xl font-bold text-gray-800">${course.price}</p>
+                                            </div>
+
+                                            <div className="flex gap-3">
+                                                {!course.subscribed ? (
+                                                    <button
+                                                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                                                        onClick={() => handleSubscribe(course)}
+                                                    >
+                                                        Subscribe & Pay
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-green-50/80 border border-green-200/50 px-4 py-2 rounded-lg">
+                                                            <p className="text-green-700 font-semibold">Already Subscribed</p>
+                                                        </div>
+                                                        <button
+                                                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                                                            onClick={() => handleUnsubscribe(course.id)}
+                                                        >
+                                                            Unsubscribe
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* MercadoPago Button */}
+                                        {selectedCourse === course.id && preferenceId && (
+                                            <div className="mt-4 p-4 bg-blue-50/50 rounded-lg border border-blue-200/30">
+                                                <MercadoPagoButton preferenceId={preferenceId} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

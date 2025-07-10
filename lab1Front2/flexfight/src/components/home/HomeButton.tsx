@@ -4,22 +4,26 @@ interface HomeButtonProps {
     name: string;
     icon: React.ReactNode;
     onClick: () => void;
-    disabled?: boolean; // New optional prop
+    disabled?: boolean;
 }
 
 const HomeButton: React.FC<HomeButtonProps> = ({ name, icon, onClick, disabled = false }) => {
     return (
         <button
-            className={`w-40 h-40 flex flex-col items-center justify-center rounded-lg shadow-lg transition duration-300 ease-in-out transform ${
+            className={`group w-full h-32 flex flex-col items-center justify-center rounded-2xl shadow-lg transition-all duration-300 ease-in-out transform backdrop-blur-lg border border-white/30 ${
                 disabled
-                    ? 'bg-gray-400'
-                    : 'bg-blue-500 text-white hover:bg-blue-700 hover:scale-105 hover:shadow-xl'
+                    ? 'bg-gray-400/50 text-gray-600 cursor-not-allowed'
+                    : 'bg-orange-500 text-white hover:bg-orange-600 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]'
             }`}
-            onClick={!disabled ? onClick : undefined} // Prevent click if disabled
-            disabled={disabled} // Set disabled state
+            onClick={!disabled ? onClick : undefined}
+            disabled={disabled}
         >
-            <div className="text-4xl mb-2">{icon}</div>
-            <div className="text-lg font-bold">{name}</div>
+            <div className={`text-3xl mb-2 transition-transform duration-300 ${!disabled && 'group-hover:scale-110'}`}>
+                {icon}
+            </div>
+            <div className="text-sm font-semibold text-center px-2 leading-tight">
+                {name}
+            </div>
         </button>
     );
 };

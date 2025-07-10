@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import CreateRoutine from './pages/CreateRoutine';
 import Profile from './pages/Profile';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';  // Import the default styles
+import 'react-toastify/dist/ReactToastify.css';
 import SavedRoutines from "./pages/SavedRoutines";
 import ActiveRoutine from "./pages/ActiveRoutine";
 import Statistics from "./pages/Statistics";
@@ -23,8 +23,9 @@ function App() {
     <div>
       <ToastContainer />
       <Routes>
-        <Route path="/" element={<Welcome />} />
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/home" element={<Home />} />
         <Route path="/create-routine" element={<CreateRoutine />} />

@@ -1,20 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import InputTextComponent from './LoginInputTextComponent';
-import ButtonComponent from './LoginButtonComponent';
 import { toast } from 'react-toastify';
+import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const LoginFormsComponent: React.FC = () => {
     const navigate = useNavigate();
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSignUpClick = () => {
         navigate('/signup');
     };
 
     const handleSubmitClick = async (event: React.FormEvent) => {
-        event.preventDefault(); // Prevent form from refreshing the page
+        event.preventDefault();
+        setIsLoading(true);
 
         const payload = {
             username: usernameRef.current?.value,
@@ -24,6 +26,7 @@ const LoginFormsComponent: React.FC = () => {
         try {
             if (!payload.username || !payload.password) {
                 toast.error('Please fill in all fields.');
+                setIsLoading(false);
                 return;
             }
 
@@ -31,7 +34,7 @@ const LoginFormsComponent: React.FC = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
-                credentials: 'include',  // Include cookies with the request
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -43,42 +46,120 @@ const LoginFormsComponent: React.FC = () => {
                     draggable: true,
                     progress: undefined,
                 });
+                setIsLoading(false);
                 return;
             }
 
             const data = await response.json();
             toast.success(`Welcome, ${data.username}!`, {
-                position: "top-center",  // Position of the toast (e.g., top-right, top-left, bottom-left, bottom-right)
-                autoClose: 5000,        // Auto close after 5 seconds
-                hideProgressBar: false, // Optionally hide progress bar
-                closeOnClick: true,     // Close on click
-                pauseOnHover: true,     // Pause on hover
-                draggable: true,        // Enable dragging the toast
-                progress: undefined,    // Optionally define custom progress
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
             });
 
-            // Redirect to home page after successful login
             navigate('/home');
         } catch (error) {
             console.error('Error:', error);
             toast.error('Something went wrong.');
+            setIsLoading(false);
         }
     };
 
     return (
-        <form
-            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-            onSubmit={handleSubmitClick}
-        >
-            <InputTextComponent label="Username:" type="text" name="username" ref={usernameRef} />
-            <InputTextComponent label="Password:" type="password" name="password" ref={passwordRef} />
-            <div className="flex items-center justify-between">
-                <ButtonComponent type="submit" text="Login" variant="primary" />
-            </div>
-            <div className="flex items-center justify-between">
-                <ButtonComponent type="button" text="Sign up" variant="secondary" onclick={handleSignUpClick} />
-            </div>
-        </form>
+        <div className="w-full max-w-md mx-auto">
+            <form
+                className="bg-white/80 backdrop-blur-lg shadow-2xl rounded-2xl p-8 space-y-6 border border-gray-200/20"
+                onSubmit={handleSubmitClick}
+            >
+                {/* Username Field */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 block">
+                        Username
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FiUser className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                            ref={usernameRef}
+                            type="text"
+                            name="username"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                            placeholder="Enter your username"
+                        />
+                    </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 block">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FiLock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                            ref={passwordRef}
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                            placeholder="Enter your password"
+                        />
+                        <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? (
+                                <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                            ) : (
+                                <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Login Button */}
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+                >
+                    {isLoading ? (
+                        <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Signing in...
+                        </div>
+                    ) : (
+                        'Sign In'
+                    )}
+                </button>
+
+                {/* Divider */}
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
+                    </div>
+                </div>
+
+                {/* Sign Up Button */}
+                <button
+                    type="button"
+                    onClick={handleSignUpClick}
+                    className="w-full bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md"
+                >
+                    Create Account
+                </button>
+            </form>
+        </div>
     );
 };
 

@@ -1,12 +1,16 @@
-
 import SignUpFormsComponent from '../components/signup/SignUpFormsComponent';
 
 
 function SignUp(){
    return (
-       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-           <div className="w-full max-w-xs">
-               <h1 className="py-10 text-center text-2xl font-bold">Sign Up</h1>
+       <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+           <div className="w-full max-w-2xl">
+               <div className="text-center mb-8">
+                   <h1 className="text-4xl font-bold text-orange-600 mb-2">
+                       Join FlexFight
+                   </h1>
+                   <p className="text-gray-600">Create your account and start your fitness journey today</p>
+               </div>
                <SignUpFormsComponent/>
            </div>
        </div>
