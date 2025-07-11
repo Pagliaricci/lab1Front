@@ -23,6 +23,7 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
     totalWeeks, 
     weekData 
 }) => {
+    
     const [isExpanded, setIsExpanded] = useState(false);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [isTrainingDayOpen, setIsTrainingDayOpen] = useState(false);
