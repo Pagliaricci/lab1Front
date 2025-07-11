@@ -15,6 +15,8 @@ const CRFormsComponent: React.FC = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [price, setPrice] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    // New state to track exercises by week
+    const [weekData, setWeekData] = useState<{[key: number]: any[]}>({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -105,6 +107,50 @@ const CRFormsComponent: React.FC = () => {
     };
 
     const weekContainerHeight = duration * 220;
+
+    // Function to duplicate a week
+    const duplicateWeek = (sourceWeekNumber: number, targetWeekNumber: number) => {
+        const sourceWeekExercises = weekData[sourceWeekNumber] || [];
+        if (sourceWeekExercises.length === 0) {
+            toast.warning('No exercises found in this week to duplicate');
+            return;
+        }
+
+        // Create new exercises for the target week
+        const duplicatedExercises = sourceWeekExercises.map(exercise => ({
+            ...exercise,
+            day: exercise.day + ((targetWeekNumber - sourceWeekNumber) * 7) // Adjust day numbers
+        }));
+
+        // Update weekData
+        setWeekData(prev => ({
+            ...prev,
+            [targetWeekNumber]: duplicatedExercises
+        }));
+
+        // Update exercises state
+        setExercises(prev => {
+            // Remove existing exercises for target week
+            const filteredExercises = prev.filter(ex => {
+                const weekStart = (targetWeekNumber - 1) * 7 + 1;
+                const weekEnd = targetWeekNumber * 7;
+                return !(ex.day >= weekStart && ex.day <= weekEnd);
+            });
+            
+            // Add duplicated exercises
+            return [...filteredExercises, ...duplicatedExercises];
+        });
+
+        toast.success(`Week ${sourceWeekNumber} duplicated to Week ${targetWeekNumber}`);
+    };
+
+    // Function to update week data when exercises are added
+    const updateWeekData = (weekNumber: number, newExercises: any[]) => {
+        setWeekData(prev => ({
+            ...prev,
+            [weekNumber]: newExercises
+        }));
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 relative">
@@ -248,6 +294,10 @@ const CRFormsComponent: React.FC = () => {
                                         weekNumber={index + 1}
                                         startDay={(index * 7) + 1}
                                         setExercises={setExercises}
+                                        onDuplicateWeek={duplicateWeek}
+                                        onUpdateWeekData={updateWeekData}
+                                        totalWeeks={duration}
+                                        weekData={weekData[index + 1] || []}
                                     />
                                 ))}
                             </div>

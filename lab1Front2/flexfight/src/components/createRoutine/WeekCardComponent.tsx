@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaCheck } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaCheck, FaCopy } from 'react-icons/fa';
 import Modal from './ModalComponent';
 import ExerciseSearchComponent from './ExerciseSearchComponent';
 import { AddedExercise } from './ExerciseSearchComponent';
@@ -7,14 +7,49 @@ import { AddedExercise } from './ExerciseSearchComponent';
 interface WeekCardComponentProps {
     weekNumber: number;
     startDay: number;
-    setExercises: React.Dispatch<React.SetStateAction<any[]>>; // Function to update the exercises
+    setExercises: React.Dispatch<React.SetStateAction<any[]>>;
+    onDuplicateWeek: (sourceWeek: number, targetWeek: number) => void;
+    onUpdateWeekData: (weekNumber: number, exercises: any[]) => void;
+    totalWeeks: number;
+    weekData: any[];
 }
 
-const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, startDay, setExercises }) => {
+const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ 
+    weekNumber, 
+    startDay, 
+    setExercises, 
+    onDuplicateWeek, 
+    onUpdateWeekData, 
+    totalWeeks, 
+    weekData 
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [isTrainingDayOpen, setIsTrainingDayOpen] = useState(false);
     const [completedExercises, setCompletedExercises] = useState<{ [key: number]: AddedExercise[] }>({});
+    const [showDuplicateMenu, setShowDuplicateMenu] = useState(false);
+
+    // Update completedExercises when weekData changes
+    useEffect(() => {
+        if (weekData.length > 0) {
+            const exercisesByDay: { [key: number]: AddedExercise[] } = {};
+            weekData.forEach(exercise => {
+                const dayIndex = (exercise.day - startDay);
+                if (dayIndex >= 0 && dayIndex < 7) {
+                    if (!exercisesByDay[dayIndex]) {
+                        exercisesByDay[dayIndex] = [];
+                    }
+                    exercisesByDay[dayIndex].push({
+                        id: exercise.id,
+                        name: exercise.name || 'Exercise',
+                        series: exercise.sets,
+                        reps: exercise.reps
+                    });
+                }
+            });
+            setCompletedExercises(exercisesByDay);
+        }
+    }, [weekData, startDay]);
 
     const daysOfWeek = Array.from({ length: 7 }, (_, i) => startDay + i);
 
@@ -39,23 +74,93 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({ weekNumber, start
                 [selectedDay]: addedExercises,
             }));
 
+            // Create new exercises for the parent component
+            const newExercises = addedExercises.map((exercise) => ({
+                id: exercise.id,
+                sets: exercise.series,
+                reps: exercise.reps,
+                day: daysOfWeek[selectedDay], // Use the actual day value
+                name: exercise.name, // Include name for week data
+            }));
+
             // Update exercises in the parent component (CRFormsComponent)
             setExercises((prev) => [
                 ...prev,
-                ...addedExercises.map((exercise) => ({
-                    id: exercise.id,
-                    sets: exercise.series,
-                    reps: exercise.reps,
-                    day: daysOfWeek[selectedDay], // Use the actual day value
-                })),
+                ...newExercises,
             ]);
 
+            // Update week data for duplicating functionality
+            const currentWeekExercises = weekData.filter(ex => {
+                const dayIndex = ex.day - startDay;
+                return dayIndex !== selectedDay; // Remove exercises for this day
+            });
+
+            const updatedWeekData = [
+                ...currentWeekExercises,
+                ...newExercises
+            ];
+
+            onUpdateWeekData(weekNumber, updatedWeekData);
         }
         setIsTrainingDayOpen(false);
     };
 
+    const handleDuplicateClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (selectedDay !== null) {
+            const sourceWeek = weekNumber;
+            const targetWeek = weekNumber + 1 > totalWeeks ? weekNumber : weekNumber + 1;
+            onDuplicateWeek(sourceWeek, targetWeek);
+        }
+    };
+
+    const handleDuplicateToWeek = (targetWeek: number) => {
+        onDuplicateWeek(weekNumber, targetWeek);
+        setShowDuplicateMenu(false);
+    };
+
+    const hasExercises = Object.keys(completedExercises).length > 0;
+
     return (
-        <div className="w-full border border-orange-200 rounded-xl shadow-lg mb-4 overflow-hidden bg-white">
+        <div className="w-full border border-orange-200 rounded-xl shadow-lg mb-4 overflow-hidden bg-white relative">
+            {/* Duplicate Button */}
+            {hasExercises && totalWeeks > 1 && (
+                <div className="absolute top-2 right-2 z-10">
+                    <div className="relative">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDuplicateMenu(!showDuplicateMenu);
+                            }}
+                            className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
+                            title="Duplicate this week"
+                        >
+                            <FaCopy size={14} />
+                        </button>
+                        
+                        {/* Duplicate Menu */}
+                        {showDuplicateMenu && (
+                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[160px]">
+                                <div className="p-2 border-b border-gray-100 text-sm font-semibold text-gray-700">
+                                    Duplicate to:
+                                </div>
+                                {Array.from({ length: totalWeeks }, (_, i) => i + 1)
+                                    .filter(week => week !== weekNumber)
+                                    .map(week => (
+                                        <button
+                                            key={week}
+                                            onClick={() => handleDuplicateToWeek(week)}
+                                            className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-200"
+                                        >
+                                            Week {week}
+                                        </button>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div
                 className="p-4 bg-orange-500 text-white font-bold cursor-pointer flex justify-between items-center hover:bg-orange-600 transition-colors duration-200"
                 onClick={toggleExpand}
