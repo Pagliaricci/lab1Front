@@ -282,35 +282,6 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
         </div>
     );
 
-    const renderIMCHistory = () => (
-        <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-center">IMC History</h3>
-            {weightHistory && weightHistory.length > 0 ? (
-                <Bar
-                    data={{
-                        labels: weightHistory.map(entry => new Date(entry.date).toLocaleDateString()),
-                        datasets: [{
-                            label: 'IMC Progress',
-                            data: weightHistory.map(entry => calculateIMC(entry.weight, userHeight!)),
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            borderWidth: 1,
-                        }],
-                    }}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                            },
-                        },
-                    }}
-                />
-            ) : (
-                <p className="text-center text-gray-500">No IMC history available</p>
-            )}
-        </div>
-    );
-
     const renderSetObjectiveSection = () => (
         <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
             <h3 className="text-xl font-bold mb-4 text-center">Set Weight Objective</h3>
@@ -380,7 +351,6 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
                 </div>
             </div>
             {renderWeightHistory()}
-            {renderIMCHistory()}
             {renderSetObjectiveSection()}
             <ToastContainer />
         </div>

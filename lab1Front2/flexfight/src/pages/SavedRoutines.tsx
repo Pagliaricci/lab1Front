@@ -24,6 +24,8 @@ const SavedRoutines: React.FC = () => {
     const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
     const [subscriptionHistory, setSubscriptionHistory] = useState<SubscriberHistoryWithName[]>([]);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [routineToDelete, setRoutineToDelete] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -119,23 +121,41 @@ const SavedRoutines: React.FC = () => {
 
     const handleDeleteRoutine = async (routineId: string) => {
         try {
-            const response = await fetch(`http://localhost:8081/api/routines/deactivate/${routineId}`, {
+            const response = await fetch(`http://localhost:8081/api/routines/remove/${routineId}?userId=${userID}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                toast.error(`Error deleting routine: ${errorText}`);
+                toast.error(`Error removing routine: ${errorText}`);
                 return;
             }
 
-            toast.success('Routine deleted successfully');
+            toast.success('Routine removed successfully');
             setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineId));
         } catch (error) {
-            console.error('Error deleting routine:', error);
-            toast.error('An error occurred while deleting the routine.');
+            console.error('Error removing routine:', error);
+            toast.error('An error occurred while removing the routine.');
         }
+    };
+
+    const handleDeleteClick = (routineId: string) => {
+        setRoutineToDelete(routineId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (routineToDelete) {
+            handleDeleteRoutine(routineToDelete);
+            setIsDeleteModalOpen(false);
+            setRoutineToDelete(null);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setRoutineToDelete(null);
     };
 
     const handleShareRoutine = (routineId: string) => {
@@ -222,7 +242,7 @@ const SavedRoutines: React.FC = () => {
                                         isActive={routine.isActive}
                                         onActivate={() => handleActivateRoutine(routine.id)}
                                         onDeactivate={() => handleDeactivateRoutine(routine.id)}
-                                        onDelete={() => handleDeleteRoutine(routine.id)}
+                                        onDelete={() => handleDeleteClick(routine.id)}
                                         onShare={userRole === 'Trainer' ? () => handleShareRoutine(routine.id) : undefined}
                                         onShowHistory={userRole === 'Trainer' ? () => handleShowHistory(routine.id) : undefined}
                                         userRole={userRole}
@@ -265,6 +285,32 @@ const SavedRoutines: React.FC = () => {
                 onClose={() => setIsHistoryModalOpen(false)}
                 subscriptionHistory={subscriptionHistory}
             />
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+                        <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+                        <p className="text-gray-700 mb-4">
+                            Are you sure you want to delete this routine? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={handleCancelDelete}
+                                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmDelete}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

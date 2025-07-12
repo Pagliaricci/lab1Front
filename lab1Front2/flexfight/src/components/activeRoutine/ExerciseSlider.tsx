@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FullProgressExercise } from '../../pages/ActiveRoutine';
 
 interface Exercise {
@@ -9,8 +9,6 @@ interface Exercise {
     day: number;
 }
 
-
-
 interface ExerciseSliderProps {
     duration: number;
     exercisesByDay: Record<number, Exercise[] | FullProgressExercise[]>;
@@ -20,9 +18,16 @@ interface ExerciseSliderProps {
 const ExerciseSlider: React.FC<ExerciseSliderProps> = ({ duration, onDayChange }) => {
     const totalDays = duration * 7;
     const [tooltip, setTooltip] = useState({ visible: false, value: 1, left: 0 });
+    const [currentDay, setCurrentDay] = useState(1);
+
+    // Initialize with day 1 when component mounts
+    useEffect(() => {
+        onDayChange(1);
+    }, []); // Empty dependency array to run only once
 
     const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const day = parseInt(event.target.value, 10);
+        setCurrentDay(day);
         onDayChange(day);
         const slider = event.target;
         const rect = slider.getBoundingClientRect();
@@ -36,14 +41,14 @@ const ExerciseSlider: React.FC<ExerciseSliderProps> = ({ duration, onDayChange }
                 type="range"
                 min="1"
                 max={totalDays}
-                defaultValue="1"
+                value={currentDay}
                 onChange={handleSliderChange}
                 className="w-full h-4 bg-blue-500 rounded-lg appearance-none cursor-pointer"
                 onMouseEnter={() => setTooltip((prev) => ({ ...prev, visible: true }))}
                 onMouseLeave={() => setTooltip((prev) => ({ ...prev, visible: false }))}
                 style={{ WebkitAppearance: 'none', appearance: 'none' }}
             />
-            <style >{`
+            <style>{`
                 input[type='range']::-webkit-slider-thumb {
                     width: 24px;
                     height: 24px;

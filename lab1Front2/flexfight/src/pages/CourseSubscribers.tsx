@@ -243,17 +243,19 @@ interface ExerciseProgressWithDetails {
                                                                                        {courses.map(course => (
                                                                                            <div key={course.id} className="bg-white/80 backdrop-blur-lg p-6 rounded-xl border border-orange-200/30 shadow-sm">
                                                                                                <div className="space-y-4">
-                                                                                                   <div>
-                                                                                                       <h2 className="text-xl font-bold text-gray-800 mb-2">{course.name}</h2>
-                                                                                                       <p className="text-gray-600">{course.description}</p>
+                                                                                                   <div className="flex justify-between items-center">
+                                                                                                       <div>
+                                                                                                           <h2 className="text-xl font-bold text-gray-800 mb-2">{course.name}</h2>
+                                                                                                           <p className="text-gray-600">{course.description}</p>
+                                                                                                       </div>
+                                                                                                       
+                                                                                                       <button
+                                                                                                           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+                                                                                                           onClick={() => toggleSubscribers(course.id)}
+                                                                                                       >
+                                                                                                           {subscribers[course.id] ? 'Hide Subscribers' : 'Show Subscribers'}
+                                                                                                       </button>
                                                                                                    </div>
-                                                                                                   
-                                                                                                   <button
-                                                                                                       className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
-                                                                                                       onClick={() => toggleSubscribers(course.id)}
-                                                                                                   >
-                                                                                                       {subscribers[course.id] ? 'Hide Subscribers' : 'Show Subscribers'}
-                                                                                                   </button>
 
                                                                                                    {subscribers[course.id] && (
                                                                                                        <div className="mt-4 space-y-3">

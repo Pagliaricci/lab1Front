@@ -284,10 +284,7 @@ const CRFormsComponent: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
                                 Weekly Schedule
                             </h3>
-                            <div 
-                                className="overflow-y-auto transition-all duration-300 space-y-4 max-h-96 bg-gray-50/50 rounded-xl p-4 border border-gray-200"
-                                style={{maxHeight: `${weekContainerHeight}px`}}
-                            >
+                            <div className="space-y-4">
                                 {Array.from({length: duration}, (_, index) => (
                                     <WeekCardComponent
                                         key={index}

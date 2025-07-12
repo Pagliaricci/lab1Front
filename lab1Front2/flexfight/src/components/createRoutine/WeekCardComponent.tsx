@@ -141,21 +141,24 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
                         
                         {/* Duplicate Menu */}
                         {showDuplicateMenu && (
-                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[160px]">
-                                <div className="p-2 border-b border-gray-100 text-sm font-semibold text-gray-700">
+                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-20 w-48 max-h-64 overflow-y-auto">
+                                <div className="p-3 border-b border-gray-100 text-sm font-semibold text-gray-700 bg-gray-50">
                                     Duplicate to:
                                 </div>
-                                {Array.from({ length: totalWeeks }, (_, i) => i + 1)
-                                    .filter(week => week !== weekNumber)
-                                    .map(week => (
-                                        <button
-                                            key={week}
-                                            onClick={() => handleDuplicateToWeek(week)}
-                                            className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-200"
-                                        >
-                                            Week {week}
-                                        </button>
-                                    ))}
+                                <div className="py-1">
+                                    {Array.from({ length: totalWeeks }, (_, i) => i + 1)
+                                        .filter(week => week !== weekNumber)
+                                        .map(week => (
+                                            <button
+                                                key={week}
+                                                onClick={() => handleDuplicateToWeek(week)}
+                                                className="w-full text-left px-4 py-3 hover:bg-orange-50 text-sm text-gray-700 transition-colors duration-200 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+                                            >
+                                                <span className="font-medium">Week {week}</span>
+                                                <span className="text-xs text-gray-500">Click to duplicate</span>
+                                            </button>
+                                        ))}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -170,12 +173,12 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
                 <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>▼</span>
             </div>
             {isExpanded && (
-                <div className="p-4 bg-orange-50/50">
-                    <div className="grid grid-cols-7 gap-2">
+                <div className="p-6 bg-orange-50/50">
+                    <div className="grid grid-cols-7 gap-3 mb-6">
                         {daysOfWeek.map((day, index) => (
                             <div key={index} className="flex flex-col items-center">
                                 <div
-                                    className={`w-10 h-10 flex items-center justify-center border-2 rounded-lg cursor-pointer transition-all duration-200 ease-in-out font-semibold ${
+                                    className={`w-12 h-12 flex items-center justify-center border-2 rounded-lg cursor-pointer transition-all duration-200 ease-in-out font-semibold ${
                                         selectedDay === index 
                                             ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md' 
                                             : 'bg-white border-gray-300 hover:border-blue-300 hover:bg-blue-50'
@@ -188,24 +191,36 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
                         ))}
                     </div>
                     {selectedDay !== null && (
-                        <div className="mt-4 flex flex-col items-center">
+                        <div className="mt-6">
                             {completedExercises[selectedDay] ? (
-                                <div className="flex flex-wrap justify-center gap-4">
-                                    {completedExercises[selectedDay].map((exercise, idx) => (
-                                        <div key={idx} className="p-3 bg-white border border-blue-200 text-center rounded-xl shadow-sm w-32 hover:shadow-md transition-shadow duration-200">
-                                            <div className="font-bold text-gray-800">{exercise.name}</div>
-                                            <div className="text-sm text-gray-600">Series: {exercise.series}</div>
-                                            <div className="text-sm text-gray-600">Reps: {exercise.reps}</div>
-                                        </div>
-                                    ))}
+                                <div className="w-full">
+                                    <div className="flex flex-wrap justify-center gap-4 mb-6">
+                                        {completedExercises[selectedDay].map((exercise, idx) => (
+                                            <div key={idx} className="p-4 bg-white border border-blue-200 text-center rounded-xl shadow-sm w-36 hover:shadow-md transition-shadow duration-200">
+                                                <div className="font-bold text-gray-800 mb-2">{exercise.name}</div>
+                                                <div className="text-sm text-gray-600 mb-1">Series: {exercise.series}</div>
+                                                <div className="text-sm text-gray-600">Reps: {exercise.reps}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <button
+                                            className="bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
+                                            onClick={handleAddTrainingClick}
+                                        >
+                                            Edit Training
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
-                                <button
-                                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
-                                    onClick={handleAddTrainingClick}
-                                >
-                                    Add training
-                                </button>
+                                <div className="flex justify-center">
+                                    <button
+                                        className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
+                                        onClick={handleAddTrainingClick}
+                                    >
+                                        Add training
+                                    </button>
+                                </div>
                             )}
                         </div>
                     )}
