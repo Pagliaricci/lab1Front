@@ -201,7 +201,16 @@ const ActiveRoutine: React.FC = () => {
                 });
 
                 if (response.ok) {
-                    toast.success('Routine started!');
+                    toast.success('Routine started!', {
+                        style: toastSuccessStyle,
+                        position: 'top-center',
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined,
+                    });
                     fetchProgress(routine.id, userId);
                 } else {
                     setError('Failed to start routine');
@@ -250,7 +259,16 @@ const ActiveRoutine: React.FC = () => {
 
             if (response.ok) {
                 setIsModalOpen(false);
-                toast.success('Routine rated successfully!');
+                toast.success('Routine rated successfully!', {
+                    style: toastSuccessStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
                 navigate('/home');
             } else {
                 setError('Failed to rate routine');
@@ -259,6 +277,24 @@ const ActiveRoutine: React.FC = () => {
             console.error('Error rating routine:', err);
             setError('Failed to rate routine');
         }
+    };
+
+    // Toast styles
+    const toastErrorStyle = {
+        background: '#FEE2E2', // rojo pastel
+        color: '#991B1B', // rojo apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #FCA5A5',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
+    };
+    const toastSuccessStyle = {
+        background: '#DCFCE7', // verde pastel
+        color: '#166534', // verde apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #86EFAC',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
     };
 
     if (loading) {
@@ -520,3 +556,4 @@ const ActiveRoutine: React.FC = () => {
 };
 
 export default ActiveRoutine;
+

@@ -50,11 +50,16 @@ const LoginFormsComponent: React.FC = () => {
                         autoClose: 4000,
                         hideProgressBar: true,
                         closeOnClick: true,
-                        draggable: true,
                         pauseOnHover: false,
-                        progress: undefined,
-                        theme: "colored",
-                        transition: Bounce,
+                        draggable: false,
+                        style: {
+                            background: '#FEE2E2', // rojo pastel
+                            color: '#991B1B', // rojo apagado
+                            borderRadius: '0.75rem',
+                            border: '1px solid #FCA5A5',
+                            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                            textAlign: 'center',
+                        },
                         icon: false,
                     }
                 );

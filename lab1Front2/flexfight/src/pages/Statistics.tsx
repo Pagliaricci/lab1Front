@@ -6,6 +6,7 @@ import 'react-calendar/dist/Calendar.css';
 import SetRMComponent from '../components/stats/SetRMComponent';
 import SetWeightComponent from '../components/stats/SetWeightComponent';
 import DaysTrainedObjective from '../components/stats/DaysTrainedObjective';
+import { toast } from 'react-toastify';
 
 const Statistics: React.FC = () => {
     const navigate = useNavigate();
@@ -17,6 +18,24 @@ const Statistics: React.FC = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [exercisesForDate, setExercisesForDate] = useState<any[]>([]);
+
+    const toastSuccessStyle = {
+        background: '#d1fae5',
+        color: '#065f46',
+        fontWeight: '500',
+        borderRadius: '0.375rem',
+        padding: '0.75rem 1.25rem',
+        boxShadow: '0 10px 15px -3px rgba(5, 31, 70, 0.1), 0 4px 6px -2px rgba(5, 31, 70, 0.05)',
+    };
+
+    const toastErrorStyle = {
+        background: '#fee2e2',
+        color: '#991b1b',
+        fontWeight: '500',
+        borderRadius: '0.375rem',
+        padding: '0.75rem 1.25rem',
+        boxShadow: '0 10px 15px -3px rgba(5, 31, 70, 0.1), 0 4px 6px -2px rgba(5, 31, 70, 0.05)',
+    };
 
     const tabs = [
         { id: 'overview', label: 'Training Overview', icon: '📊' },
@@ -124,10 +143,28 @@ const Statistics: React.FC = () => {
 
             if (response.ok) {
                 const oneRepMax = await response.json();
-                alert(`1RM calculated successfully: ${oneRepMax.toFixed(2)} kg`);
+                toast.success(`1RM calculated successfully: ${oneRepMax.toFixed(2)} kg`, {
+                    style: toastSuccessStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
             } else {
                 const errorData = await response.text();
-                alert(`Error: ${errorData}`);
+                toast.error(`Error: ${errorData}`, {
+                    style: toastErrorStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
             }
         } catch (error) {
             console.error('Error setting RM:', error);
@@ -451,3 +488,4 @@ const Statistics: React.FC = () => {
 };
 
 export default Statistics;
+
