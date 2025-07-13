@@ -129,6 +129,7 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
                 <div className="absolute top-2 right-2 z-10">
                     <div className="relative">
                         <button
+                            type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowDuplicateMenu(!showDuplicateMenu);
@@ -150,6 +151,7 @@ const WeekCardComponent: React.FC<WeekCardComponentProps> = ({
                                         .filter(week => week !== weekNumber)
                                         .map(week => (
                                             <button
+                                                type="button"
                                                 key={week}
                                                 onClick={() => handleDuplicateToWeek(week)}
                                                 className="w-full text-left px-4 py-3 hover:bg-orange-50 text-sm text-gray-700 transition-colors duration-200 flex items-center justify-between border-b border-gray-100 last:border-b-0"

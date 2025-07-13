@@ -14,6 +14,23 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
     const [objectiveReached, setObjectiveReached] = useState(false);
     const [isShowned, setIsShowned] = useState(false);
 
+    // Toast styles
+    const toastErrorStyle = {
+        background: '#FEE2E2', // rojo pastel
+        color: '#991B1B', // rojo apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #FCA5A5',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
+    };
+    const toastSuccessStyle = {
+        background: '#DCFCE7', // verde pastel
+        color: '#166534', // verde apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #86EFAC',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
+    };
 
     const setObjectiveRecord = async (objectiveName: string, objectiveValue: number, currentValue: number) => {
         if (!userId) {
@@ -71,16 +88,45 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
                         await setObjectiveRecord('Days trained Objective', daysTrainedThisMonth, Number(data));
 
                         if (!isShowned) {
-                            toast.success(`Congratulations! You have reached your training objective of ${data} days for ${currentMonth}.`);
+                            toast.success(`Congratulations! You have reached your training objective of ${data} days for ${currentMonth}.`, {
+                                style: toastSuccessStyle,
+                                position: 'top-center',
+                                autoClose: 4000,
+                                hideProgressBar: true,
+                                closeOnClick: true,
+                                pauseOnHover: false,
+                                draggable: false,
+                                progress: undefined,
+                            });
                             setIsShowned(true);
                         }
                         console.log("Objective reached:", objectiveReached);
                     }
                 } else {
                     const errorText = await response.text();
+                    toast.error("Failed to fetch training days objective.", {
+                        style: toastErrorStyle,
+                        position: 'top-center',
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined,
+                    });
                     console.error("Failed to fetch training days objective:", errorText);
                 }
             } catch (error) {
+                toast.error("Error fetching training days objective.", {
+                    style: toastErrorStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
                 console.error("Error fetching training days objective:", error);
             }
         };

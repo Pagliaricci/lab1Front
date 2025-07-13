@@ -1,6 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react';
-import InputTextComponent from '../login/LoginInputTextComponent';
-import SwitchComponent from '../signup/SignUpSwitch';
 import WeekCardComponent from '../createRoutine/WeekCardComponent';
 import { TiArrowBackOutline } from 'react-icons/ti';
 import { useNavigate } from 'react-router-dom';
@@ -46,12 +44,37 @@ const CRFormsComponent: React.FC = () => {
         navigate('/home');
     };
 
+    // Toast style constants
+    const toastErrorStyle = {
+        background: '#FEE2E2', // rojo pastel
+        color: '#991B1B', // rojo apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #FCA5A5',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+    };
+    const toastSuccessStyle = {
+        background: '#DCFCE7', // verde pastel
+        color: '#166534', // verde apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #86EFAC',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+    };
+
     const handleCreateRoutine = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsLoading(true);
 
         if (!userId) {
-            toast.error('User ID not found. Please try again.');
+            toast.error('User ID not found. Please try again.', {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                style: toastErrorStyle,
+                icon: false,
+            });
             setIsLoading(false);
             return;
         }
@@ -83,17 +106,44 @@ const CRFormsComponent: React.FC = () => {
 
             if (!response.ok) {
                 const errorData = await response.text();
-                toast.error(`Error: ${errorData}`);
+                toast.error(`Error: ${errorData}`, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    style: toastErrorStyle,
+                    icon: false,
+                });
                 setIsLoading(false);
                 return;
             }
 
             const message = await response.text();
-            toast.success(message);
+            toast.success(message, {
+                position: "top-center",
+                autoClose: 2500,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                style: toastSuccessStyle,
+                icon: false,
+            });
             navigate('/home');
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Something went wrong.');
+            toast.error('Something went wrong.', {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                style: toastErrorStyle,
+                icon: false,
+            });
             setIsLoading(false);
         }
     };
@@ -141,7 +191,16 @@ const CRFormsComponent: React.FC = () => {
             return [...filteredExercises, ...duplicatedExercises];
         });
 
-        toast.success(`Week ${sourceWeekNumber} duplicated to Week ${targetWeekNumber}`);
+        toast.success(`Week ${sourceWeekNumber} duplicated to Week ${targetWeekNumber}`, {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            style: toastSuccessStyle,
+            icon: false,
+        });
     };
 
     // Function to update week data when exercises are added
@@ -325,3 +384,4 @@ const CRFormsComponent: React.FC = () => {
 };
 
 export default CRFormsComponent;
+

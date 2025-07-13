@@ -119,6 +119,24 @@ const SavedRoutines: React.FC = () => {
             });
     };
 
+    // Toast styles
+const toastErrorStyle = {
+    background: '#FEE2E2', // rojo pastel
+    color: '#991B1B', // rojo apagado
+    borderRadius: '0.75rem',
+    border: '1px solid #FCA5A5',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    textAlign: 'center',
+};
+const toastSuccessStyle = {
+    background: '#DCFCE7', // verde pastel
+    color: '#166534', // verde apagado
+    borderRadius: '0.75rem',
+    border: '1px solid #86EFAC',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    textAlign: 'center',
+};
+
     const handleDeleteRoutine = async (routineId: string) => {
         try {
             const response = await fetch(`http://localhost:8081/api/routines/remove/${routineId}?userId=${userID}`, {
@@ -128,15 +146,42 @@ const SavedRoutines: React.FC = () => {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                toast.error(`Error removing routine: ${errorText}`);
+                toast.error(`Error removing routine: ${errorText}`, {
+                    style: toastErrorStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
                 return;
             }
 
-            toast.success('Routine removed successfully');
+            toast.success('Routine removed successfully', {
+                style: toastSuccessStyle,
+                position: 'top-center',
+                autoClose: 4000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined,
+            });
             setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineId));
         } catch (error) {
             console.error('Error removing routine:', error);
-            toast.error('An error occurred while removing the routine.');
+            toast.error('An error occurred while removing the routine.', {
+                style: toastErrorStyle,
+                position: 'top-center',
+                autoClose: 4000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined,
+            });
         }
     };
 
@@ -168,11 +213,29 @@ const SavedRoutines: React.FC = () => {
         navigator.clipboard
             .writeText(link)
             .then(() => {
-                toast.success('Link copied to clipboard!');
+                toast.success('Link copied to clipboard!', {
+                    style: toastSuccessStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
             })
             .catch((err) => {
                 console.error('Failed to copy link: ', err);
-                toast.error('Failed to copy link.');
+                toast.error('Failed to copy link.', {
+                    style: toastErrorStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    progress: undefined,
+                });
             });
         setIsShareModalOpen(false);
     };
@@ -316,3 +379,4 @@ const SavedRoutines: React.FC = () => {
 };
 
 export default SavedRoutines;
+

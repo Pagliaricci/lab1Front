@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiCalendar } from 'react-icons/fi';
+import { FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 
 const SignUpFormsComponent: React.FC = () => {
     const navigate = useNavigate();
@@ -17,10 +17,24 @@ const SignUpFormsComponent: React.FC = () => {
     const [gender, setGender] = useState('Male');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+
+    const validatePassword = (password: string) => {
+        // Mínimo 6 caracteres, al menos una mayúscula y un número (caracter especial opcional)
+        return /^(?=.*[A-Z])(?=.*\d).{6,}$/.test(password);
+    };
 
     const handleCreateAccount = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsLoading(true);
+        setPasswordError(null);
+
+        const password = passwordRef.current?.value || "";
+        if (!validatePassword(password)) {
+            setPasswordError("Password must be at least 6 characters, include an uppercase letter, and a number.");
+            setIsLoading(false);
+            return;
+        }
 
         const payload = {
             username: usernameRef.current?.value,
@@ -42,13 +56,71 @@ const SignUpFormsComponent: React.FC = () => {
 
             if (!response.ok) {
                 const errorData = await response.text();
-                toast.error(`Error: ${errorData}`);
+                toast.error(`Error: ${errorData}`, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    style: {
+                        background: '#FEE2E2', // rojo pastel
+                        color: '#991B1B', // rojo apagado
+                        borderRadius: '0.75rem',
+                        border: '1px solid #FCA5A5',
+                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    },
+                    icon: false,
+                });
                 setIsLoading(false);
                 return;
             }
 
             const message = await response.text();
-            toast.success(message);
+            // Si el backend responde con un mensaje de error pero status 200, no redirigir
+            if (typeof message === 'string' && message.toLowerCase().includes('already exists')) {
+                toast.error(`Error: ${message}`, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    style: {
+                        background: '#FEE2E2',
+                        color: '#991B1B',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #FCA5A5',
+                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    },
+                    icon: false,
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            toast.success(
+                <div className="flex items-center gap-2">
+                    <FiCheckCircle className="text-green-500 text-lg" />
+                    <span className="text-green-700">{message}</span>
+                </div>,
+                {
+                    position: "top-center",
+                    autoClose: 2500,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    style: {
+                        background: '#DCFCE7', // verde pastel
+                        color: '#166534', // verde apagado
+                        borderRadius: '0.75rem',
+                        border: '1px solid #86EFAC',
+                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    },
+                    icon: false,
+                }
+            );
             navigate('/login');
         } catch (error) {
             console.error('Error:', error);
@@ -136,7 +208,7 @@ const SignUpFormsComponent: React.FC = () => {
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FiLock className="h-5 w-5 text-gray-400" />
+                                <FiLock className="h-5 w-5 text-gray-400" style={{ top: '50%', transform: 'translateY(-50%)' }} />
                             </div>
                             <input
                                 ref={passwordRef}
@@ -144,11 +216,16 @@ const SignUpFormsComponent: React.FC = () => {
                                 name="password"
                                 className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                                 placeholder="Create a strong password"
-                                required
                             />
+                            <div style={{ minHeight: '18px', position: 'relative' }}>
+                                {passwordError && (
+                                    <p className="text-xs text-rose-500 mt-1 ml-2 absolute">{passwordError}</p>
+                                )}
+                            </div>
                             <button
                                 type="button"
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                style={{ top: '50%', transform: 'translateY(-50%)' }}
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (

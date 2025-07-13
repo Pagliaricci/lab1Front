@@ -167,35 +167,38 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
                         : Number(weight) <= currentWeightObjective;
                     if (objectiveReached) {
                         toast.success(`Congratulations! You have reached your weight objective of ${isHigherObjective ? 'higher than' : 'lower than'} ${currentWeightObjective} kg.`, {
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
+                            style: toastSuccessStyle,
+                            position: 'top-center',
+                            autoClose: 4000,
+                            hideProgressBar: true,
                             closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
+                            pauseOnHover: false,
+                            draggable: false,
                             progress: undefined,
                         });
                         setObjectiveReached(true);
                         await setObjectiveRecord('Weight Objective', currentWeightObjective, Number(weight));
                     } else {
                         toast.success(`Weight set successfully: ${weight} kg`, {
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
+                            style: toastSuccessStyle,
+                            position: 'top-center',
+                            autoClose: 4000,
+                            hideProgressBar: true,
                             closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
+                            pauseOnHover: false,
+                            draggable: false,
                             progress: undefined,
                         });
                     }
                 } else {
                     toast.success(`Weight set successfully: ${weight} kg`, {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
+                        style: toastSuccessStyle,
+                        position: 'top-center',
+                        autoClose: 4000,
+                        hideProgressBar: true,
                         closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
+                        pauseOnHover: false,
+                        draggable: false,
                         progress: undefined,
                     });
                 }
@@ -227,12 +230,13 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
 
             if (response.ok) {
                 toast.success(`Weight objective set successfully: ${objective} kg ${isHigher ? 'higher than' : 'lower than'}`, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
+                    style: toastSuccessStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
                     closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
+                    pauseOnHover: false,
+                    draggable: false,
                     progress: undefined,
                 });
                 setObjectiveReached(false);
@@ -355,6 +359,24 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
             <ToastContainer />
         </div>
     );
+};
+
+// Toast styles
+const toastErrorStyle = {
+    background: '#FEE2E2', // rojo pastel
+    color: '#991B1B', // rojo apagado
+    borderRadius: '0.75rem',
+    border: '1px solid #FCA5A5',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    textAlign: 'center',
+};
+const toastSuccessStyle = {
+    background: '#DCFCE7', // verde pastel
+    color: '#166534', // verde apagado
+    borderRadius: '0.75rem',
+    border: '1px solid #86EFAC',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    textAlign: 'center',
 };
 
 export default SetWeightComponent;

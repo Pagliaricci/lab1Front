@@ -33,6 +33,24 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
     const [rmHistory, setRmHistory] = useState<{ date: string, rm: number }[] | null>(null);
     const [objectiveReached, setObjectiveReached] = useState(false);
 
+    // Toast styles
+    const toastErrorStyle = {
+        background: '#FEE2E2', // rojo pastel
+        color: '#991B1B', // rojo apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #FCA5A5',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
+    };
+    const toastSuccessStyle = {
+        background: '#DCFCE7', // verde pastel
+        color: '#166534', // verde apagado
+        borderRadius: '0.75rem',
+        border: '1px solid #86EFAC',
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+        textAlign: 'center',
+    };
+
     const fetchExercises = useCallback(async () => {
         setLoading(true);
         try {
@@ -204,12 +222,13 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
             onSetRM(selectedExercise.id, Number(reps), newRM);
             if (selectedExercise.objective && selectedExercise.objective !== 0.0 && newRM >= selectedExercise.objective) {
                 toast.success(`Congratulations! You have reached your objective of ${selectedExercise.objective} kg.`, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
+                    style: toastSuccessStyle,
+                    position: 'top-center',
+                    autoClose: 4000,
+                    hideProgressBar: true,
                     closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
+                    pauseOnHover: false,
+                    draggable: false,
                     progress: undefined,
                 });
                 console.log("AAAAAAAAAAA")
@@ -419,3 +438,4 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
 };
 
 export default SetRMComponent;
+

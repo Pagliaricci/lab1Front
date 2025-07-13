@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Bounce } from 'react-toastify';
+import { FiUser, FiLock, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 
 const LoginFormsComponent: React.FC = () => {
     const navigate = useNavigate();
@@ -38,28 +39,57 @@ const LoginFormsComponent: React.FC = () => {
             });
 
             if (!response.ok) {
-                toast.error(`Error while logging in`, {
-                    position: "top-center",
-                    autoClose: 3000,
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    draggable: true,
-                    progress: undefined,
-                });
+                // Custom error for unregistered user
+                toast.error(
+                    <div className="flex items-center gap-2">
+                        <FiUser className="text-rose-500 text-lg" />
+                        <span>No account found with that username. Please register first.</span>
+                    </div>,
+                    {
+                        position: "top-center",
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        style: {
+                            background: '#FEE2E2', // rojo pastel
+                            color: '#991B1B', // rojo apagado
+                            borderRadius: '0.75rem',
+                            border: '1px solid #FCA5A5',
+                            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                            textAlign: 'center',
+                        },
+                        icon: false,
+                    }
+                );
                 setIsLoading(false);
                 return;
             }
 
             const data = await response.json();
-            toast.success(`Welcome, ${data.username}!`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            toast.success(
+                <div className="flex items-center gap-2">
+                    <FiCheckCircle className="text-green-500 text-lg" />
+                    <span className="text-green-700">Welcome, {data.username}!</span>
+                </div>,
+                {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    style: {
+                        background: '#DCFCE7', // verde pastel
+                        color: '#166534', // verde apagado
+                        borderRadius: '0.75rem',
+                        border: '1px solid #86EFAC',
+                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    },
+                    icon: false,
+                }
+            );
 
             navigate('/home');
         } catch (error) {
