@@ -59,11 +59,22 @@ function Home() {
                     credentials: 'include',
                 });
                 if (response.ok) {
-                    const routine = await response.json();
-                    setActiveRoutine(routine?.name || null);
-                    setDuration(routine?.duration || 1);
-                    if (routine) {
-                        fetchRoutineProgress(userId, routine.id);
+                    const text = await response.text();
+                    if (text) {
+                        try {
+                            const routine = JSON.parse(text);
+                            setActiveRoutine(routine?.name || null);
+                            setDuration(routine?.duration || 1);
+                            if (routine) {
+                                fetchRoutineProgress(userId, routine.id);
+                            }
+                        } catch (parseError) {
+                            console.error('Error parsing JSON:', parseError);
+                            setActiveRoutine(null);
+                        }
+                    } else {
+                        console.log('No active routine found (empty response)');
+                        setActiveRoutine(null);
                     }
                 } else {
                     console.error('No active routine found');

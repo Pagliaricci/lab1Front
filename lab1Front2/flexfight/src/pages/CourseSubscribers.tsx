@@ -264,7 +264,13 @@ interface ExerciseProgressWithDetails {
                                                                                                                    <div key={subscriber.id} className="bg-orange-50/80 rounded-lg p-4 border border-orange-200/50 flex justify-between items-center">
                                                                                                                        <div>
                                                                                                                            <p className="font-semibold text-gray-800">{subscriber.username}</p>
-                                                                                                                           <p className="text-sm text-gray-600">Day {subscriber.progress.day} - {subscriber.progress.amountOfExercisesDone} exercises completed</p>
+                                                                                                                           <p className="text-sm text-gray-600">
+                                                                                                                               {subscriber.progress ? (
+                                                                                                                                   `Day ${subscriber.progress.day} - ${subscriber.progress.amountOfExercisesDone} exercises completed`
+                                                                                                                               ) : (
+                                                                                                                                   'No progress data available'
+                                                                                                                               )}
+                                                                                                                           </p>
                                                                                                                        </div>
                                                                                                                        <button
                                                                                                                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"

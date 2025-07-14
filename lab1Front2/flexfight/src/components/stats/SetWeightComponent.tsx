@@ -229,7 +229,7 @@ const SetWeightComponent: React.FC<SetWeightProps> = ({ userId, userHeight }) =>
             });
 
             if (response.ok) {
-                toast.success(`Weight objective set successfully: ${objective} kg ${isHigher ? 'higher than' : 'lower than'}`, {
+                toast.success(`Weight objective set successfully: ${objective} kg ${isHigher ? 'lower than' : 'higher than'}`, {
                     style: toastSuccessStyle,
                     position: 'top-center',
                     autoClose: 4000,
