@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
         import { TiArrowBackOutline } from 'react-icons/ti';
         import ExerciseSlider from '../components/activeRoutine/ExerciseSlider';
         import Button from '../components/activeRoutine/Button';
+        import { toast } from 'react-toastify';
 
         interface Routine {
             id: string;
@@ -64,8 +65,143 @@ import React, { useEffect, useState } from 'react';
             };
 
             const handleSubscribe = async (): Promise<void> => {
-                console.log('Subscribed to the course');
-                return Promise.resolve();
+                let userId = null;
+                try {
+                    const userRes = await fetch('http://localhost:8081/users/me', {
+                        method: 'GET',
+                        credentials: 'include',
+                    });
+                    if (userRes.ok) {
+                        const userData = await userRes.json();
+                        userId = userData.userID;
+                    } else {
+                        toast.error('User ID not found. Please log in again.', {
+                            position: 'top-center',
+                            style: {
+                                background: '#FEE2E2',
+                                color: '#991B1B',
+                                borderRadius: '0.75rem',
+                                border: '1px solid #FCA5A5',
+                                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                                textAlign: 'center',
+                            },
+                            autoClose: 4000,
+                            hideProgressBar: true,
+                            closeOnClick: true,
+                            draggable: false,
+                            pauseOnHover: false,
+                            icon: false,
+                        });
+                        return;
+                    }
+                } catch (error) {
+                    toast.error('Error fetching user ID.', {
+                        position: 'top-center',
+                        style: {
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            borderRadius: '0.75rem',
+                            border: '1px solid #FCA5A5',
+                            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                            textAlign: 'center',
+                        },
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        draggable: false,
+                        pauseOnHover: false,
+                        icon: false,
+                    });
+                    return;
+                }
+                if (!routine) {
+                    toast.error('Routine not found.', {
+                        position: 'top-center',
+                        style: {
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            borderRadius: '0.75rem',
+                            border: '1px solid #FCA5A5',
+                            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                            textAlign: 'center',
+                        },
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        draggable: false,
+                        pauseOnHover: false,
+                        icon: false,
+                    });
+                    return;
+                }
+                // Use price 100 as fallback if not present
+                const price = (routine as any).price || 100;
+                try {
+                    const response = await fetch(`http://localhost:8081/api/pagos/preferencia?courseId=${routine.id}&precio=${price}&userId=${userId}`, {
+                        method: 'POST',
+                        credentials: 'include',
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.init_point) {
+                            window.location.href = data.init_point;
+                        } else {
+                            toast.error('No payment link received.', {
+                                position: 'top-center',
+                                style: {
+                                    background: '#FEE2E2',
+                                    color: '#991B1B',
+                                    borderRadius: '0.75rem',
+                                    border: '1px solid #FCA5A5',
+                                    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                                    textAlign: 'center',
+                                },
+                                autoClose: 4000,
+                                hideProgressBar: true,
+                                closeOnClick: true,
+                                draggable: false,
+                                pauseOnHover: false,
+                                icon: false,
+                            });
+                        }
+                    } else {
+                        toast.error('Failed to subscribe to course.', {
+                            position: 'top-center',
+                            style: {
+                                background: '#FEE2E2',
+                                color: '#991B1B',
+                                borderRadius: '0.75rem',
+                                border: '1px solid #FCA5A5',
+                                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                                textAlign: 'center',
+                            },
+                            autoClose: 4000,
+                            hideProgressBar: true,
+                            closeOnClick: true,
+                            draggable: false,
+                            pauseOnHover: false,
+                            icon: false,
+                        });
+                    }
+                } catch (error) {
+                    toast.error('Error subscribing to course.', {
+                        position: 'top-center',
+                        style: {
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            borderRadius: '0.75rem',
+                            border: '1px solid #FCA5A5',
+                            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                            textAlign: 'center',
+                        },
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        draggable: false,
+                        pauseOnHover: false,
+                        icon: false,
+                    });
+                }
             };
 
             const handleArrowBack = () => {
@@ -101,7 +237,7 @@ import React, { useEffect, useState } from 'react';
                         ) : (
                             <>
                                 <h1 className="text-4xl font-bold text-orange-600 text-center mb-8">{routine?.name}</h1>
-                                <form className="space-y-6">
+                                <form className="space-y-6" onSubmit={e => e.preventDefault()}>
                                     <div>
                                         <label className="block text-gray-700 font-semibold mb-1">
                                             Routine Name
@@ -152,7 +288,7 @@ import React, { useEffect, useState } from 'react';
                                         )}
                                     </div>
                                     <div className="flex justify-center">
-                                        <Button label="Subscribe to this course" onClick={handleSubscribe} />
+                                        <Button label="Subscribe to this course" onClick={handleSubscribe} type="button" />
                                     </div>
                                 </form>
                             </>
