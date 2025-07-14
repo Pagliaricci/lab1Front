@@ -64,6 +64,7 @@ function Home() {
                         try {
                             const routine = JSON.parse(text);
                             setActiveRoutine(routine?.name || null);
+                            console.log(routine);
                             setDuration(routine?.duration || 1);
                             if (routine) {
                                 fetchRoutineProgress(userId, routine.id);

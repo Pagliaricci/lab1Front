@@ -37,7 +37,7 @@ function App() {
         <Route path="/course-subs" element={<CourseSubscribers />} />
         <Route path="/chats" element={<ChatsPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
-        <Route path={"/:routineId"} element={<RoutinePage />} />
+        <Route path={"/:id"} element={<RoutinePage />} />
         <Route path="/achievements" element={<Achievements />} />
 
       </Routes>
