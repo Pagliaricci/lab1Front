@@ -215,6 +215,36 @@ const SetRMComponent: React.FC<SetRMProps> = ({ onSetRM, userId }) => {
         }
     }, [selectedExercise, fetchCurrentRM, fetchRMHistory]);
 
+    // Nuevo useEffect para actualizar objectiveReached y mostrar toast si corresponde
+    useEffect(() => {
+        if (
+            selectedExercise &&
+            selectedExercise.currentRM !== undefined &&
+            selectedExercise.objective !== undefined &&
+            selectedExercise.objective !== 0.0
+        ) {
+            if (selectedExercise.currentRM >= selectedExercise.objective) {
+                if (!objectiveReached) {
+                    toast.success(`Congratulations! You have reached your objective of ${selectedExercise.objective} kg.`, {
+                        style: toastSuccessStyle,
+                        position: 'top-center',
+                        autoClose: 4000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined,
+                    });
+                    setObjectiveRecord(`${selectedExercise.name} RM Objective`, selectedExercise.currentRM, Number(selectedExercise.objective));
+                }
+                setObjectiveReached(true);
+            } else {
+                setObjectiveReached(false);
+            }
+        } else {
+            setObjectiveReached(false);
+        }
+    }, [selectedExercise]);
 
     const handleSetRMClick = async () => {
         if (selectedExercise && reps && weight) {

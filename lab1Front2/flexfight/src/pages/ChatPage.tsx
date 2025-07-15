@@ -133,6 +133,7 @@ const ChatPage = () => {
 
     const handleSendMessage = async () => {
         setReload(!reload)
+        console.log(message)
         if (!message.trim() || !userId || !chatId || !socket || !chat) return;
 
         const formattedMessage = `${chatId}:${message}`;  // 🔥 Se ajusta al formato esperado

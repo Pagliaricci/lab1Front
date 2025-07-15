@@ -86,7 +86,7 @@ import { useEffect, useState } from "react";
                 
                     const startChat = async (selectedUserId: string) => {
                         let chat: Chat = { id: "", user1Name: "", user2Name: "" };
-                
+
                         try {
                             const response = await fetch("http://localhost:8081/chats/create", {
                                 method: "POST",

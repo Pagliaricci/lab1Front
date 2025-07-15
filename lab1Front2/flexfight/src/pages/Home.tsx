@@ -19,7 +19,6 @@ function Home() {
     const navigate = useNavigate();
     const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
     const [routineProgress, setRoutineProgress] = useState<number | null>(null);
-    const [duration, setDuration] = useState<number | 1>(1);
     const [userRole, setUserRole] = useState<string | null>(null);
     const location = useLocation() as unknown as { state: LocationState };
     const successMessage = location.state?.successMessage || null;
@@ -65,9 +64,9 @@ function Home() {
                             const routine = JSON.parse(text);
                             setActiveRoutine(routine?.name || null);
                             console.log(routine);
-                            setDuration(routine?.duration || 1);
+                            console.log(routine.duration);
                             if (routine) {
-                                fetchRoutineProgress(userId, routine.id);
+                                fetchRoutineProgress(userId, routine.id, routine.duration);
                             }
                         } catch (parseError) {
                             console.error('Error parsing JSON:', parseError);
@@ -87,7 +86,7 @@ function Home() {
             }
         };
 
-        const fetchRoutineProgress = async (userId: string, routineId: string) => {
+        const fetchRoutineProgress = async (userId: string, routineId: string, duration: number) => {
             try {
                 const response = await fetch('http://localhost:8081/api/progress/update-progress-day', {
                     method: 'POST',

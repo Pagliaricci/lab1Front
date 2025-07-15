@@ -80,6 +80,11 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
 
                 if (response.ok) {
                     const data = await response.json();
+                    // If the backend returns null, undefined, or empty string, do not show error toast
+                    if (data === null || data === undefined || data === "") {
+                        setCurrentObjective("");
+                        return;
+                    }
                     setCurrentObjective(data);
                     console.log("Current objective:", data);
                     console.log("Days trained this month:", daysTrainedThisMonth);
@@ -104,16 +109,19 @@ const DaysTrainedObjective: React.FC<DaysTrainedObjectiveProps> = ({ userId, tra
                     }
                 } else {
                     const errorText = await response.text();
-                    toast.error("Failed to fetch training days objective.", {
-                        style: toastErrorStyle,
-                        position: 'top-center',
-                        autoClose: 4000,
-                        hideProgressBar: true,
-                        closeOnClick: true,
-                        pauseOnHover: false,
-                        draggable: false,
-                        progress: undefined,
-                    });
+                    // Only show error if the backend returns a real error (not just 'not set')
+                    if (errorText && errorText.toLowerCase().indexOf('not set') === -1) {
+                        toast.error("Failed to fetch training days objective.", {
+                            style: toastErrorStyle,
+                            position: 'top-center',
+                            autoClose: 4000,
+                            hideProgressBar: true,
+                            closeOnClick: true,
+                            pauseOnHover: false,
+                            draggable: false,
+                            progress: undefined,
+                        });
+                    }
                     console.error("Failed to fetch training days objective:", errorText);
                 }
             } catch (error) {
