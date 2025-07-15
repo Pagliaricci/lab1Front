@@ -98,14 +98,14 @@ const ChatPage = () => {
                     setReload(!reload)
                 }
                 // 🔥 Ajustar lógica para leer el mensaje en el formato "senderId:contenido"
-                const [senderId, messageContent] = event.data.split(":");
+                const { senderId, content } = JSON.parse(event.data);
                 const newMessage: Message = {
-                    id: Math.random().toString(), // Generar un ID temporal
-                    chatId, // Usar el chatId actual
-                    message: messageContent,
+                    id: Math.random().toString(),
+                    chatId,
+                    message: content,
                     senderId: senderId,
                     recipientId: userId !== senderId ? userId! : await getRecipientId(userId, chatId),
-                    timestamp: new Date(), // Se puede cambiar si el backend envía un timestamp
+                    timestamp: new Date(),
                 };
 
                 console.log("Received message:", newMessage);
@@ -132,18 +132,21 @@ const ChatPage = () => {
     }, [userId, chatId]);
 
     const handleSendMessage = async () => {
-        setReload(!reload)
-        console.log(message)
+        setReload(!reload);
+        console.log(message);
         if (!message.trim() || !userId || !chatId || !socket || !chat) return;
 
-        const formattedMessage = `${chatId}:${message}`;  // 🔥 Se ajusta al formato esperado
+        const formattedMessage = JSON.stringify({
+            chatId: chatId,
+            content: message,
+        });
 
         console.log("Sending message:", formattedMessage);
-        socket.send(formattedMessage);  // 🔥 Enviar en el formato correcto
-
+        socket.send(formattedMessage);
 
         setMessage(""); // Limpiar input
     };
+
 
 
     const fetchUserId = async () => {
@@ -197,7 +200,25 @@ const ChatPage = () => {
                                                 ? "bg-orange-500 text-white rounded-br-sm" 
                                                 : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm"
                                         }`}>
-                                            <p className="text-sm">{msg.message}</p>
+                                            <p className="text-sm">
+                                                {msg.message.split(" ").map((word, idx) => {
+                                                    const isLink = word.startsWith("http://") || word.startsWith("https://");
+                                                    return isLink ? (
+                                                        <a
+                                                            key={idx}
+                                                            href={word}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="underline text-blue-600 hover:text-blue-800"
+                                                        >
+                                                            {word}
+                                                        </a>
+                                                    ) : (
+                                                        <span key={idx}> {word} </span>
+                                                    );
+                                                })}
+                                            </p>
+
                                         </div>
                                     </div>
                                 ))}
